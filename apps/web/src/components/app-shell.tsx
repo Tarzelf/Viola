@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { getViewer } from '@/lib/identity';
+import { getProfileForUser } from '@/lib/queries';
+import { AccountMenu } from './account-menu';
 
 /**
  * App chrome.
@@ -7,10 +10,13 @@ import Link from 'next/link';
  * generous space, one accent. Everything energetic lives in the content and the
  * motion, never in the frame around it.
  */
-export function AppShell({ children }: { children: React.ReactNode }) {
+export async function AppShell({ children }: { children: React.ReactNode }) {
+  const viewer = await getViewer();
+  const profile = viewer.userId ? await getProfileForUser(viewer.userId) : null;
+
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[1120px] flex-col px-4 sm:px-6">
-      <Header />
+      <Header handle={profile?.handle ?? null} />
       <main className="flex-1 pt-2 pb-28">{children}</main>
       <MobileBar />
     </div>
@@ -26,7 +32,7 @@ export function Wordmark({ size = 22 }: { size?: number }) {
   );
 }
 
-function Header() {
+function Header({ handle }: { handle: string | null }) {
   return (
     <header className="sticky top-0 z-[var(--z-header,200)] -mx-4 mb-4 flex items-center justify-between border-b border-[var(--color-hairline)] bg-[rgba(11,10,15,0.72)] px-4 py-3.5 backdrop-blur-xl sm:-mx-6 sm:px-6">
       <Link href="/" aria-label="Viola home">
@@ -45,6 +51,16 @@ function Header() {
         >
           Post a fit
         </Link>
+        {handle ? (
+          <AccountMenu handle={handle} />
+        ) : (
+          <Link
+            href="/signin"
+            className="rounded-full border border-[var(--color-hairline)] px-3.5 py-2 text-[13px] font-medium text-[var(--color-text-secondary)] transition-colors hover:border-[rgba(124,92,252,0.4)] hover:text-white"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     </header>
   );

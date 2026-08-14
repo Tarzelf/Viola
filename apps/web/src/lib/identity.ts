@@ -1,6 +1,8 @@
 import 'server-only';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
+import { resolveSession } from './auth';
+import { db } from './db';
 
 /**
  * Identity: signed-in users and guests.
@@ -61,15 +63,37 @@ export interface Viewer {
 /**
  * Resolves the current viewer, minting a guest id if there isn't one.
  *
- * Read-only: Next forbids mutating cookies during render, so the caller is
- * responsible for persisting a freshly minted id via `attachGuestCookie` in a
- * route handler or middleware.
+ * The session cookie carries a signed opaque token, not a user id: sessions are
+ * looked up in the database so that signing out actually revokes, and so
+ * account deletion can terminate every device at once. A self-describing cookie
+ * cannot do either.
+ *
+ * Read-only — Next forbids mutating cookies during render, so a freshly minted
+ * guest id is persisted by `attachGuestCookie` in a route handler.
  */
 export async function getViewer(): Promise<Viewer> {
   const jar = await cookies();
-  const userId = verify(jar.get(SESSION_COOKIE)?.value);
   const guestId = verify(jar.get(GUEST_COOKIE)?.value) ?? newGuestId();
-  return { userId, guestId, isAuthenticated: userId !== null };
+
+  const token = verify(jar.get(SESSION_COOKIE)?.value);
+  if (!token) return { userId: null, guestId, isAuthenticated: false };
+
+  const session = await resolveSession(await db(), token);
+  return {
+    userId: session?.userId ?? null,
+    guestId,
+    isAuthenticated: session !== null,
+  };
+}
+
+/** Throws rather than returning null, for routes that require an account. */
+export async function requireUser(): Promise<Viewer & { userId: string }> {
+  const viewer = await getViewer();
+  if (!viewer.userId) {
+    const { unauthorized } = await import('@viola/core');
+    throw unauthorized();
+  }
+  return viewer as Viewer & { userId: string };
 }
 
 const COOKIE_OPTIONS = {
@@ -84,9 +108,15 @@ export function guestCookie(guestId: string) {
   return { name: GUEST_COOKIE, value: sign(guestId), ...COOKIE_OPTIONS };
 }
 
-export function sessionCookie(userId: string) {
-  return { name: SESSION_COOKIE, value: sign(userId), ...COOKIE_OPTIONS };
+export function sessionCookie(token: string) {
+  return { name: SESSION_COOKIE, value: sign(token), ...COOKIE_OPTIONS };
 }
+
+export function readSessionToken(signed: string | undefined): string | null {
+  return verify(signed);
+}
+
+export const SESSION_COOKIE_NAME = SESSION_COOKIE;
 
 export function clearSessionCookie() {
   return { name: SESSION_COOKIE, value: '', ...COOKIE_OPTIONS, maxAge: 0 };

@@ -112,6 +112,12 @@ export function UploadFlow() {
         form.append('photo', prepared, 'look.jpg');
 
         const response = await fetch('/api/looks', { method: 'POST', body: form });
+
+        if (response.status === 401) {
+          router.push('/signin?next=/new');
+          return;
+        }
+
         if (!response.ok) {
           const body = (await response.json().catch(() => null)) as {
             error?: { message?: string };

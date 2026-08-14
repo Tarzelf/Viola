@@ -1,6 +1,4 @@
 import { after, NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
-import { schema } from '@viola/db';
 import { db } from '@/lib/db';
 import { attachGuestCookie, getViewer } from '@/lib/identity';
 import { createLook, processLook } from '@/lib/create-look';
@@ -47,12 +45,13 @@ export async function POST(request: Request) {
     );
   }
 
-  // Until auth ships, posting attributes to the first seeded profile so the
-  // flow is exercisable end to end. Replaced by requireUser in the auth phase.
-  const userId = viewer.userId ?? (await firstUserId(database));
-  if (!userId) {
-    return NextResponse.json({ error: { code: 'unauthorized' } }, { status: 401 });
+  if (!viewer.userId) {
+    return NextResponse.json(
+      { error: { code: 'unauthorized', message: 'Sign in to post a look.' } },
+      { status: 401 },
+    );
   }
+  const userId = viewer.userId;
 
   const caption =
     typeof form?.get('caption') === 'string' ? String(form.get('caption')) : undefined;
@@ -67,14 +66,3 @@ export async function POST(request: Request) {
 
   return attachGuestCookie(NextResponse.json({ lookId, slug, status: 'processing' }), viewer);
 }
-
-async function firstUserId(database: Awaited<ReturnType<typeof db>>): Promise<string | null> {
-  const [profile] = await database
-    .select({ userId: schema.profiles.userId })
-    .from(schema.profiles)
-    .orderBy(schema.profiles.createdAt)
-    .limit(1);
-  return profile?.userId ?? null;
-}
-
-export { eq };

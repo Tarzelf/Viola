@@ -265,3 +265,13 @@ export async function getProfile(handle: string) {
     .limit(1);
   return row ?? null;
 }
+
+export async function getProfileForUser(userId: string) {
+  const database = await db();
+  const [row] = await database
+    .select()
+    .from(schema.profiles)
+    .where(eq(schema.profiles.userId, userId))
+    .limit(1);
+  return row ?? null;
+}
