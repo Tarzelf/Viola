@@ -1,6 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import type { StorageProvider } from '../types.js';
+import type { StorageProvider } from '../types';
 
 /**
  * Storage.

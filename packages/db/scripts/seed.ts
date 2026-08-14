@@ -1,6 +1,6 @@
-import { createDb } from '../src/client.js';
-import { migrate } from '../src/migrate.js';
-import { seed } from '../src/seed.js';
+import { createDb } from '../src/client';
+import { migrate } from '../src/migrate';
+import { seed } from '../src/seed';
 
 const handle = await createDb();
 

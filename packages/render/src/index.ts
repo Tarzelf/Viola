@@ -2,13 +2,13 @@ import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import sharp from 'sharp';
 import { card as cardSizes } from '@viola/design';
-import { buildCard, type CardInput, type CardItem } from './card.js';
-import { buildOgCard } from './og-card.js';
-import { loadFonts } from './fonts.js';
+import { buildCard, type CardInput, type CardItem } from './card';
+import { buildOgCard } from './og-card';
+import { loadFonts } from './fonts';
 
-export * from './card.js';
-export * from './og-card.js';
-export * from './fonts.js';
+export * from './card';
+export * from './og-card';
+export * from './fonts';
 
 /**
  * Server-side share-card rendering.

@@ -1,14 +1,14 @@
 import sharp from 'sharp';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SCORE_FLOOR } from '@viola/core';
-import { solidImage } from './imagery.js';
-import { MemoryProductCache, runPipeline } from './orchestrator.js';
+import { solidImage } from './imagery';
+import { MemoryProductCache, runPipeline } from './orchestrator';
 import {
   MemoryStorageProvider,
   MockProductSearchProvider,
   MockVisionProvider,
   mockProviders,
-} from './providers/index.js';
+} from './providers/index';
 
 /** Serves a synthetic catalogue image, so the imagery stage runs offline. */
 let catalogueImage: Buffer;

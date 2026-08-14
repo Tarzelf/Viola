@@ -1,5 +1,5 @@
-import { createDb } from '../src/client.js';
-import { migrate } from '../src/migrate.js';
+import { createDb } from '../src/client';
+import { migrate } from '../src/migrate';
 
 const handle = await createDb();
 const target = process.env.DATABASE_URL ? 'DATABASE_URL' : 'in-process PGlite';

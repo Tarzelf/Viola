@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { computeEnergyMap, type EnergyMap } from './layout.js';
+import { computeEnergyMap, type EnergyMap } from './layout';
 
 /**
  * Local image processing.

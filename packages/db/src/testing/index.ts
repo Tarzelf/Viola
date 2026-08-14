@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { createDb, type DbHandle } from '../client.js';
-import { migrate, rowsOf } from '../migrate.js';
+import { createDb, type DbHandle } from '../client';
+import { migrate, rowsOf } from '../migrate';
 
 /**
  * Test harness.

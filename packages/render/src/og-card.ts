@@ -1,7 +1,7 @@
 import { formatItemLabel, formatPrice } from '@viola/core';
 import { color } from '@viola/design';
-import { truncate } from './card.js';
-import type { CardItem } from './card.js';
+import { truncate } from './card';
+import type { CardItem } from './card';
 
 /**
  * The link-preview card.

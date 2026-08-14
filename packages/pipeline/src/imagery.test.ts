@@ -12,7 +12,7 @@ import {
   prepareUpload,
   solidImage,
   tinyPlaceholder,
-} from './imagery.js';
+} from './imagery';
 
 /** A JPEG carrying EXIF, including a GPS block. */
 async function photoWithGps(): Promise<Buffer> {

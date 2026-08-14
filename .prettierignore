@@ -13,3 +13,5 @@ packages/design/src/theme.css
 packages/render/assets/fonts/**
 **/__snapshots__/**
 **/fixtures/**/*.json
+apps/web/next-env.d.ts
+apps/web/.next/

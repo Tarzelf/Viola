@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { card as cardSizes, color } from '@viola/design';
 import type { LookLayout } from '@viola/core';
-import { renderAllCards, renderLookCard, truncate } from './index.js';
+import { renderAllCards, renderLookCard, truncate } from './index';
 
 /**
  * Renderer tests.

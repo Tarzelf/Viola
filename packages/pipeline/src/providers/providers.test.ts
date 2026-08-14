@@ -12,7 +12,7 @@ import {
   describeProviders,
   mockProviders,
   resolveProviders,
-} from './index.js';
+} from './index';
 
 describe('provider resolution', () => {
   it('defaults to mocks with a completely empty environment', () => {

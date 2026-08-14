@@ -1,4 +1,4 @@
-import { color, gradient, layout, motion, radius, shadow, space, type, font } from './tokens.js';
+import { color, gradient, layout, motion, radius, shadow, space, type, font } from './tokens';
 
 /**
  * Derives the CSS custom properties for the web theme directly from the TS

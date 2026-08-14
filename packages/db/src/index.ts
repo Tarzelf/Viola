@@ -1,3 +1,4 @@
-export * from './client.js';
-export * from './migrate.js';
-export * as schema from './schema/index.js';
+export * from './client';
+export * from './migrate';
+export * from './seed';
+export * as schema from './schema/index';

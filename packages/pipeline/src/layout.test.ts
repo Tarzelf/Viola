@@ -9,7 +9,7 @@ import {
   guttersFor,
   leaderLineStart,
   subjectBandFromBoxes,
-} from './layout.js';
+} from './layout';
 
 /** The reference outfit: watch, shorts, shoes, jacket on a centred subject. */
 const REFERENCE_BOXES: BBox[] = [

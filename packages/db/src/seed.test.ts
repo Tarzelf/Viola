@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { SCORE_FLOOR } from '@viola/core';
-import type { DbHandle } from './client.js';
-import { seed } from './seed.js';
+import type { DbHandle } from './client';
+import { seed } from './seed';
 import {
   blooms,
   lookItems,
@@ -11,8 +11,8 @@ import {
   products,
   profiles,
   vaults,
-} from './schema/index.js';
-import { createTestDb } from './testing/index.js';
+} from './schema/index';
+import { createTestDb } from './testing/index';
 
 let handle: DbHandle;
 

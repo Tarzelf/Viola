@@ -1,7 +1,7 @@
 import type { ProductCandidate } from '@viola/core';
 import { describe, expect, it } from 'vitest';
-import { buildSearchQuery, normaliseQuery, queryHash, tokenOverlap } from './normalise.js';
-import { MIN_ACCEPTABLE_SCORE, isResaleSource, rankCandidates, resolveBest } from './ranking.js';
+import { buildSearchQuery, normaliseQuery, queryHash, tokenOverlap } from './normalise';
+import { MIN_ACCEPTABLE_SCORE, isResaleSource, rankCandidates, resolveBest } from './ranking';
 
 const candidate = (over: Partial<ProductCandidate> = {}): ProductCandidate => ({
   title: 'HOKA Skyward X Running Shoe',

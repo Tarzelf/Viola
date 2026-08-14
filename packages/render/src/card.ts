@@ -100,7 +100,9 @@ function itemCard(item: CardItem, slot: LookLayout['slots'][number], W: number, 
           top: px(lineY * H),
           width: px(lineWidth),
           height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.38)',
+          // Matched to the web card after visual QA found the original too
+          // faint to trace against a busy photograph.
+          backgroundColor: 'rgba(255,255,255,0.55)',
         },
       }),
     );

@@ -1,5 +1,5 @@
 import { computeScore, generateSlug, getArchetype, type ScoreBreakdown } from '@viola/core';
-import type { Database } from './client.js';
+import type { Database } from './client';
 import {
   blooms,
   lookItems,
@@ -12,7 +12,7 @@ import {
   users,
   vaultItems,
   vaults,
-} from './schema/index.js';
+} from './schema/index';
 
 /**
  * Demo data.

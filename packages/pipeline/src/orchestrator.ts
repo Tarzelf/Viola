@@ -7,11 +7,11 @@ import {
   type VisionResult,
   type ViolaScore,
 } from '@viola/core';
-import { analysisRaster, makeCutout, prepareUpload, tinyPlaceholder } from './imagery.js';
-import { computeLayout } from './layout.js';
-import { buildSearchQuery, queryHash } from './normalise.js';
-import { resolveBest, type ResolutionResult } from './ranking.js';
-import type { Providers } from './providers/types.js';
+import { analysisRaster, makeCutout, prepareUpload, tinyPlaceholder } from './imagery';
+import { computeLayout } from './layout';
+import { buildSearchQuery, queryHash } from './normalise';
+import { resolveBest, type ResolutionResult } from './ranking';
+import type { Providers } from './providers/types';
 
 /**
  * The pipeline orchestrator.

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { visionResultSchema, type VisionResult } from '@viola/core';
-import type { VisionProvider, VisionRequest } from '../types.js';
+import type { VisionProvider, VisionRequest } from '../types';
 
 /**
  * The mock vision provider.

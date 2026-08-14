@@ -2,25 +2,25 @@ import {
   NoopAffiliateProvider,
   ResilientAffiliateProvider,
   SovrnAffiliateProvider,
-} from './affiliate/index.js';
-import { MockProductSearchProvider } from './product/mock.js';
-import { SerpApiProductSearchProvider } from './product/serpapi.js';
+} from './affiliate/index';
+import { MockProductSearchProvider } from './product/mock';
+import { SerpApiProductSearchProvider } from './product/serpapi';
 import {
   LocalFsStorageProvider,
   MemoryStorageProvider,
   SupabaseStorageProvider,
-} from './storage/index.js';
-import { GeminiVisionProvider } from './vision/gemini.js';
-import { MockVisionProvider } from './vision/mock.js';
-import type { ProviderMode, Providers } from './types.js';
+} from './storage/index';
+import { GeminiVisionProvider } from './vision/gemini';
+import { MockVisionProvider } from './vision/mock';
+import type { ProviderMode, Providers } from './types';
 
-export * from './types.js';
-export * from './vision/mock.js';
-export * from './vision/gemini.js';
-export * from './product/mock.js';
-export * from './product/serpapi.js';
-export * from './affiliate/index.js';
-export * from './storage/index.js';
+export * from './types';
+export * from './vision/mock';
+export * from './vision/gemini';
+export * from './product/mock';
+export * from './product/serpapi';
+export * from './affiliate/index';
+export * from './storage/index';
 
 /**
  * Provider resolution.

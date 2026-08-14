@@ -1,5 +1,5 @@
 import type { ProductCandidate } from '@viola/core';
-import { normaliseQuery, tokenOverlap } from './normalise.js';
+import { normaliseQuery, tokenOverlap } from './normalise';
 
 /**
  * Ranking search results.

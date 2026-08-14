@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { DbHandle } from '../client.js';
-import { loadMigrations, rowsOf } from '../migrate.js';
-import { createTestDb, truncateAll } from '../testing/index.js';
-import { blooms, looks, lookItems, products, profiles, users, vaults } from './index.js';
+import type { DbHandle } from '../client';
+import { loadMigrations, rowsOf } from '../migrate';
+import { createTestDb, truncateAll } from '../testing/index';
+import { blooms, looks, lookItems, products, profiles, users, vaults } from './index';
 
 let handle: DbHandle;
 
@@ -69,7 +69,7 @@ describe('migrations', () => {
   });
 
   it('is idempotent — re-running applies nothing', async () => {
-    const { migrate } = await import('../migrate.js');
+    const { migrate } = await import('../migrate');
     const result = await migrate(handle.db);
     expect(result.applied).toHaveLength(0);
     expect(result.skipped.length).toBeGreaterThan(0);

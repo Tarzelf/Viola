@@ -1,6 +1,6 @@
 import { productCandidateSchema, type ProductCandidate } from '@viola/core';
-import { normaliseQuery, tokenOverlap } from '../../normalise.js';
-import type { ProductSearchProvider, ProductSearchRequest } from '../types.js';
+import { normaliseQuery, tokenOverlap } from '../../normalise';
+import type { ProductSearchProvider, ProductSearchRequest } from '../types';
 
 /**
  * Mock product search.

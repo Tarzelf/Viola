@@ -1,4 +1,4 @@
-import { type Archetype, type ScoreDimension } from './archetypes.js';
+import { type Archetype, type ScoreDimension } from './archetypes';
 
 /**
  * The Viola Score.

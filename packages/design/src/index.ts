@@ -1,3 +1,3 @@
-export * from './tokens.js';
-export * from './native.js';
-export * from './css.js';
+export * from './tokens';
+export * from './native';
+export * from './css';

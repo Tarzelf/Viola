@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatItemLabel, formatItemLine } from './labels.js';
+import { formatItemLabel, formatItemLine } from './labels';
 
 describe('formatItemLabel', () => {
   it('does not repeat the brand when the retailer title already includes it', () => {

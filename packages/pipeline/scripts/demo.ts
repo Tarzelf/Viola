@@ -9,9 +9,9 @@
  */
 import { getArchetype, scoreHeadline, formatPrice, formatItemLabel } from '@viola/core';
 import sharp from 'sharp';
-import { MemoryProductCache, runPipeline } from '../src/orchestrator.js';
-import { mockProviders, MockProductSearchProvider } from '../src/providers/index.js';
-import { solidImage } from '../src/imagery.js';
+import { MemoryProductCache, runPipeline } from '../src/orchestrator';
+import { mockProviders, MockProductSearchProvider } from '../src/providers/index';
+import { solidImage } from '../src/imagery';
 
 const products = new MockProductSearchProvider();
 const providers = mockProviders({ products });

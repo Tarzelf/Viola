@@ -1,5 +1,5 @@
 import { GARMENT_CATEGORIES, visionResultSchema, type VisionResult } from '@viola/core';
-import type { VisionProvider, VisionRequest } from '../types.js';
+import type { VisionProvider, VisionRequest } from '../types';
 
 /**
  * Gemini vision provider.

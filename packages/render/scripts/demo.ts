@@ -18,7 +18,7 @@ import {
   mockProviders,
   runPipeline,
 } from '@viola/pipeline';
-import { renderAllCards } from '../src/index.js';
+import { renderAllCards } from '../src/index';
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', '.demo');
 await mkdir(outDir, { recursive: true });

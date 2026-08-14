@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getArchetype, pickArchetype, rankArchetypes, ARCHETYPES } from './archetypes.js';
+import { getArchetype, pickArchetype, rankArchetypes, ARCHETYPES } from './archetypes';
 import {
   SCORE_BANDS,
   SCORE_CEILING,
@@ -10,7 +10,7 @@ import {
   scoreHeadline,
   strongestDimension,
   type ScoreBreakdown,
-} from './scoring.js';
+} from './scoring';
 
 const raw = (n: number): ScoreBreakdown => ({
   fit: n,

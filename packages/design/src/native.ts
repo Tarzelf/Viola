@@ -1,4 +1,4 @@
-import { type TypeToken, motion, type } from './tokens.js';
+import { type TypeToken, motion, type } from './tokens';
 
 /**
  * Native-side consumption of the tokens.

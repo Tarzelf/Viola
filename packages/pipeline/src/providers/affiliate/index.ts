@@ -1,4 +1,4 @@
-import type { AffiliateProvider, AffiliateWrapRequest } from '../types.js';
+import type { AffiliateProvider, AffiliateWrapRequest } from '../types';
 
 /**
  * Affiliate link wrapping.

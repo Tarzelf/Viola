@@ -10,8 +10,8 @@ import {
   uuid,
   boolean,
 } from 'drizzle-orm/pg-core';
-import { users } from './identity.js';
-import { looks } from './looks.js';
+import { users } from './identity';
+import { looks } from './looks';
 
 const id = () =>
   uuid('id')

@@ -6,8 +6,8 @@ import {
   kFactor,
   K_FACTOR_TARGET,
   type ViralFunnelStep,
-} from './analytics.js';
-import { ViolaError, isViolaError, notFound } from './errors.js';
+} from './analytics';
+import { ViolaError, isViolaError, notFound } from './errors';
 import {
   FREE,
   PLUS,
@@ -16,9 +16,9 @@ import {
   formatPrice,
   resolveTier,
   type SubscriptionState,
-} from './plans.js';
-import { SLUG_LENGTH, generateSlug, isValidSlug, suggestHandle } from './slug.js';
-import { bboxSchema, createLookSchema, handleSchema, visionItemSchema } from './schemas.js';
+} from './plans';
+import { SLUG_LENGTH, generateSlug, isValidSlug, suggestHandle } from './slug';
+import { bboxSchema, createLookSchema, handleSchema, visionItemSchema } from './schemas';
 
 describe('slugs', () => {
   it('generates valid slugs of the expected length', () => {

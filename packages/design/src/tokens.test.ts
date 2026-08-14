@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { buildCssVars, renderThemeCss } from './css.js';
-import { buildTextStyles, revealDelay, spring, textStyle } from './native.js';
-import { color, gradient, motion, radius, shadow, type } from './tokens.js';
+import { buildCssVars, renderThemeCss } from './css';
+import { buildTextStyles, revealDelay, spring, textStyle } from './native';
+import { color, gradient, motion, radius, shadow, type } from './tokens';
 
 const here = dirname(fileURLToPath(import.meta.url));
 

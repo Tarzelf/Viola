@@ -1,5 +1,5 @@
 import { productCandidateSchema, type ProductCandidate } from '@viola/core';
-import type { ProductSearchProvider, ProductSearchRequest } from '../types.js';
+import type { ProductSearchProvider, ProductSearchRequest } from '../types';
 
 /**
  * SerpApi Google Shopping provider.

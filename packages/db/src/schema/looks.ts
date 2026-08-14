@@ -12,7 +12,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import type { BBox, LookLayout, ScoreBreakdown } from '@viola/core';
-import { users } from './identity.js';
+import { users } from './identity';
 
 const id = () =>
   uuid('id')
