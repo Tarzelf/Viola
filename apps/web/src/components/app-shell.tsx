@@ -17,7 +17,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[1120px] flex-col px-4 sm:px-6">
       <Header handle={profile?.handle ?? null} />
-      <main className="flex-1 pt-2 pb-28">{children}</main>
+      <main className="flex-1 pt-2">{children}</main>
+      <Footer />
       <MobileBar />
     </div>
   );
@@ -63,6 +64,33 @@ function Header({ handle }: { handle: string | null }) {
         )}
       </div>
     </header>
+  );
+}
+
+/** Published contact info is a guideline 1.2 requirement, so it is linked
+ *  from every page rather than buried. */
+function Footer() {
+  return (
+    <footer className="mt-16 border-t border-[var(--color-hairline)] py-7 pb-28 sm:pb-7">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <span className="text-[12px] text-[var(--color-text-tertiary)]">Viola</span>
+        <Link
+          href="/contact"
+          className="text-[12px] text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+        >
+          Contact
+        </Link>
+        <Link
+          href="/plus"
+          className="text-[12px] text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+        >
+          Viola Plus
+        </Link>
+        <span className="text-[12px] text-[var(--color-text-tertiary)]">
+          Retailers pay us a commission. It never costs you more.
+        </span>
+      </div>
+    </footer>
   );
 }
 

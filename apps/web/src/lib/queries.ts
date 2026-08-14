@@ -1,8 +1,9 @@
 import 'server-only';
-import { and, desc, eq, gt, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, notInArray, sql } from 'drizzle-orm';
 import { schema } from '@viola/db';
 import { getArchetype, type LookLayout, type ScoreBreakdown } from '@viola/core';
 import { db } from './db';
+import { hiddenUserIds } from './safety';
 
 /**
  * Read models.
@@ -82,8 +83,16 @@ export async function getFeed(options: {
   // a public ranking of the lowest-scoring looks would be actively harmful to
   // the audience this is built for.
   const weekAgo = new Date(Date.now() - 7 * 86_400_000);
-  const where =
-    options.tab === 'top' ? and(VISIBLE, gt(schema.looks.publishedAt, weekAgo)) : VISIBLE;
+
+  // Blocking has to actually hide content, not merely be recorded. Applied at
+  // the feed query so there is no render path that can forget it.
+  const hidden = await hiddenUserIds(database, options.viewerUserId ?? null);
+
+  const clauses = [
+    options.tab === 'top' ? and(VISIBLE, gt(schema.looks.publishedAt, weekAgo)) : VISIBLE,
+  ];
+  if (hidden.length > 0) clauses.push(notInArray(schema.looks.userId, hidden));
+  const where = and(...clauses);
 
   const rows = await database
     .select({
@@ -213,6 +222,12 @@ export async function getLookBySlug(
   if (!row) return null;
   // Quarantined content is never reachable, even by direct link.
   if (row.status === 'quarantined') return null;
+
+  // A blocked author's look stays unreachable even if someone has the URL.
+  if (options.viewerUserId) {
+    const hidden = await hiddenUserIds(database, options.viewerUserId);
+    if (hidden.includes(row.userId)) return null;
+  }
 
   const items = await database
     .select({

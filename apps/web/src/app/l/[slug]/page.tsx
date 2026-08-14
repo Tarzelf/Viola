@@ -11,6 +11,7 @@ import { formatCount } from '@/lib/format';
 import { SaveButton } from '@/components/save-button';
 import { ShareRow } from '@/components/share-row';
 import { ViewPing } from '@/components/view-ping';
+import { ReportMenu } from '@/components/report-menu';
 import { Wordmark } from '@/components/app-shell';
 
 export const dynamic = 'force-dynamic';
@@ -99,12 +100,13 @@ export default async function SharePage({ params, searchParams }: PageProps) {
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[13px] font-semibold text-[var(--color-viola)]">
           {look.handle.slice(0, 1).toUpperCase()}
         </div>
-        <p className="text-[14px] text-[var(--color-text-secondary)]">
+        <p className="flex-1 text-[14px] text-[var(--color-text-secondary)]">
           <Link href={`/@${look.handle}`} className="font-semibold text-white hover:underline">
             @{look.handle}
           </Link>{' '}
           wants you to rate this fit
         </p>
+        <ReportMenu lookId={look.id} handle={look.handle} />
       </div>
 
       <LookCard look={look} priority />
