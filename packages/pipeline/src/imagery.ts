@@ -86,6 +86,74 @@ export interface CutoutOptions {
   width?: number;
   /** Trim tolerance. Catalogue whites are rarely pure #fff. */
   threshold?: number;
+  /** How close to white a pixel must be to count as background, 0-255. */
+  whiteCutoff?: number;
+}
+
+/**
+ * Removes the white background from a catalogue image.
+ *
+ * Trimming alone is not enough. `sharp.trim()` crops the surrounding whitespace
+ * but leaves an opaque white rectangle, so the product sits in a visible box
+ * when composited over a photo instead of floating. That box is the difference
+ * between the reference layout and something that looks like a debug overlay.
+ *
+ * The removal is a flood fill inward from the border rather than a global
+ * "delete every white pixel" threshold. That distinction matters a great deal
+ * here: a white sneaker on a white background is extremely common in fashion
+ * catalogues, and a global threshold would erase the product itself. Only white
+ * that is reachable from the edge is background.
+ */
+export async function removeWhiteBackground(input: Buffer, whiteCutoff = 238): Promise<Buffer> {
+  const { data, info } = await sharp(input)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const { width, height, channels } = info;
+  const pixels = new Uint8ClampedArray(data);
+  const visited = new Uint8Array(width * height);
+
+  const isNearWhite = (idx: number) => {
+    const o = idx * channels;
+    return (
+      pixels[o]! >= whiteCutoff && pixels[o + 1]! >= whiteCutoff && pixels[o + 2]! >= whiteCutoff
+    );
+  };
+
+  // Seed from every border pixel, then flood inward.
+  const queue: number[] = [];
+  const push = (x: number, y: number) => {
+    const idx = y * width + x;
+    if (visited[idx] || !isNearWhite(idx)) return;
+    visited[idx] = 1;
+    queue.push(idx);
+  };
+
+  for (let x = 0; x < width; x++) {
+    push(x, 0);
+    push(x, height - 1);
+  }
+  for (let y = 0; y < height; y++) {
+    push(0, y);
+    push(width - 1, y);
+  }
+
+  while (queue.length > 0) {
+    const idx = queue.pop()!;
+    const x = idx % width;
+    const y = (idx - x) / width;
+    pixels[idx * channels + 3] = 0;
+
+    if (x > 0) push(x - 1, y);
+    if (x < width - 1) push(x + 1, y);
+    if (y > 0) push(x, y - 1);
+    if (y < height - 1) push(x, y + 1);
+  }
+
+  return sharp(Buffer.from(pixels.buffer), { raw: { width, height, channels: 4 } })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
 }
 
 /**
@@ -102,20 +170,21 @@ export async function makeCutout(input: Buffer, options: CutoutOptions = {}): Pr
   const width = options.width ?? 512;
   const threshold = options.threshold ?? 12;
 
+  let trimmed: Buffer;
   try {
-    return await sharp(input, { failOn: 'none' })
-      .trim({ threshold })
-      .resize({ width, height: width, fit: 'inside', withoutEnlargement: true })
-      .png({ compressionLevel: 9 })
-      .toBuffer();
+    trimmed = await sharp(input, { failOn: 'none' }).trim({ threshold }).png().toBuffer();
   } catch {
-    // trim() throws when an image is entirely uniform. Fall back to a plain
-    // resize rather than losing the product image altogether.
-    return sharp(input, { failOn: 'none' })
-      .resize({ width, height: width, fit: 'inside', withoutEnlargement: true })
-      .png({ compressionLevel: 9 })
-      .toBuffer();
+    // trim() throws when an image is entirely uniform. Keep the image rather
+    // than losing the product altogether.
+    trimmed = await sharp(input, { failOn: 'none' }).png().toBuffer();
   }
+
+  const transparent = await removeWhiteBackground(trimmed, options.whiteCutoff);
+
+  return sharp(transparent)
+    .resize({ width, height: width, fit: 'inside', withoutEnlargement: true })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
 }
 
 /** Average colour, used to pick a contrast-safe label treatment. */

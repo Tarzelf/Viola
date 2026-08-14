@@ -141,6 +141,31 @@ describe('computeLayout', () => {
     }
   });
 
+  it('never places a card where the score pill goes', () => {
+    // Found by rendering: a low-sitting garment (shoes, almost always) put its
+    // card straight through the pill. The pill is the one element every shared
+    // card depends on, so the bottom band is reserved.
+    const lowItems: BBox[] = [
+      [0.4, 0.9, 0.6, 0.98],
+      [0.35, 0.86, 0.5, 0.95],
+    ];
+    const layout = computeLayout({ boxes: lowItems });
+    for (const slot of layout.slots) {
+      expect(slot.rect.y1).toBeLessThanOrEqual(1 - DEFAULT_LAYOUT_OPTIONS.bottomSafeZone + 1e-9);
+    }
+  });
+
+  it('keeps cards clear of the top edge', () => {
+    const highItems: BBox[] = [
+      [0.4, 0.01, 0.6, 0.06],
+      [0.35, 0.02, 0.5, 0.08],
+    ];
+    const layout = computeLayout({ boxes: highItems });
+    for (const slot of layout.slots) {
+      expect(slot.rect.y0).toBeGreaterThanOrEqual(DEFAULT_LAYOUT_OPTIONS.topSafeZone - 1e-9);
+    }
+  });
+
   it('anchors each card to the centroid of its garment', () => {
     const layout = computeLayout({ boxes: REFERENCE_BOXES });
     for (const slot of layout.slots) {
@@ -170,16 +195,17 @@ describe('computeLayout', () => {
     expect([...indices].sort((x, y) => x - y)).toEqual(indices);
   });
 
-  it('fits a busy ten-item outfit across both gutters without overlap', () => {
-    // Each gutter holds about six slots of 0.15 height, so ten is within
-    // capacity. Worth asserting, because it means a maximalist outfit still
-    // gets a fully annotated card.
-    const many: BBox[] = Array.from({ length: 10 }, (_, i) => {
+  it('fits a busy eight-item outfit across both gutters without overlap', () => {
+    // Capacity is four slots per gutter once the bottom safe zone is reserved
+    // for the score pill. That reservation costs two slots versus an unguarded
+    // layout, and it is the right trade: an occluded score pill ruins the one
+    // element every shared card depends on.
+    const many: BBox[] = Array.from({ length: 8 }, (_, i) => {
       const y = 0.05 + i * 0.09;
       return [0.4, y, 0.6, y + 0.05] as BBox;
     });
     const layout = computeLayout({ boxes: many });
-    expect(layout.slots).toHaveLength(10);
+    expect(layout.slots).toHaveLength(8);
     expect(layout.unplaced).toHaveLength(0);
 
     for (let i = 0; i < layout.slots.length; i++) {

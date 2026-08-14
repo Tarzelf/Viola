@@ -51,6 +51,14 @@ export interface LayoutOptions {
   balanceWeight: number;
   /** Vertical offsets tried, in order, when searching for a free slot. */
   offsets: readonly number[];
+  /**
+   * Fraction of the frame reserved at the bottom for the score pill and the
+   * handle watermark. Without this, a card placed low collides with the pill —
+   * which is the one element on the card that must always be legible.
+   */
+  bottomSafeZone: number;
+  /** Reserved at the top for the subject's head and any app chrome. */
+  topSafeZone: number;
 }
 
 export const DEFAULT_LAYOUT_OPTIONS: LayoutOptions = {
@@ -62,6 +70,8 @@ export const DEFAULT_LAYOUT_OPTIONS: LayoutOptions = {
   driftWeight: 220,
   balanceWeight: 9,
   offsets: [0, -0.05, 0.05, -0.1, 0.1, -0.16, 0.16, -0.22, 0.22],
+  bottomSafeZone: 0.18,
+  topSafeZone: 0.04,
 };
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
@@ -235,12 +245,15 @@ export function computeLayout({ boxes, energy, options }: PlacementInput): LookL
           ? Math.max(opts.padding, gutter.x1 - opts.padding - width)
           : Math.min(1 - opts.padding - width, gutter.x0 + opts.padding);
 
+      const minY = Math.max(opts.padding, opts.topSafeZone);
+      const maxY = 1 - opts.bottomSafeZone - opts.slotHeight;
+
       for (const dy of opts.offsets) {
-        const y0 = clamp(
-          entry.yCentre - opts.slotHeight / 2 + dy,
-          opts.padding,
-          1 - opts.slotHeight - opts.padding,
-        );
+        // A garment low in the frame (shoes, almost always) still gets a card,
+        // but the card is lifted clear of the score pill rather than sitting
+        // on top of it.
+        if (maxY < minY) continue;
+        const y0 = clamp(entry.yCentre - opts.slotHeight / 2 + dy, minY, maxY);
         const rect: Rect = { x0, y0, x1: x0 + width, y1: y0 + opts.slotHeight };
 
         if (placed.some((p) => overlaps(rect, p))) continue;
