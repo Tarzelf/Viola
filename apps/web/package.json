@@ -11,7 +11,9 @@
     "lint": "eslint src",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "clean": "rm -rf .next dist .turbo"
+    "clean": "rm -rf .next dist .turbo",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@viola/core": "workspace:*",
@@ -30,6 +32,8 @@
     "@types/react-dom": "^19.0.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "@playwright/test": "^1.62.1",
+    "sharp": "^0.35.3"
   }
 }

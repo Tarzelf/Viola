@@ -263,7 +263,7 @@ export function UploadFlow() {
   if (phase === 'error') {
     return (
       <div className="surface px-6 py-12 text-center">
-        <p className="display text-[24px] text-white">That didn&rsquo;t work</p>
+        <h2 className="display text-[24px] text-white">That didn&rsquo;t work</h2>
         <p className="mt-2 text-[14px] text-[var(--color-text-secondary)]">{error}</p>
         <button
           type="button"

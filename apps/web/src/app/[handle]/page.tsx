@@ -87,7 +87,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ handle
 
       {looks.length === 0 ? (
         <div className="surface px-6 py-16 text-center">
-          <p className="display text-[22px] text-white">No looks yet</p>
+          <h2 className="display text-[22px] text-white">No looks yet</h2>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">

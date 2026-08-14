@@ -23,6 +23,29 @@ pnpm test
 pnpm typecheck
 ```
 
+## End-to-end tests
+
+```bash
+pnpm --filter @viola/web e2e        # headless
+pnpm --filter @viola/web e2e:ui     # watch it run
+```
+
+Runs against a real server with the real pipeline in mock mode — nothing is
+stubbed at the network layer, because the interesting failures live in the
+seams between stages rather than inside any one of them. Reuses a dev server if
+one is already up.
+
+The suite drives the loop the product depends on: sign in, upload, reveal,
+publish, then open the share link **in a completely clean browser context** and
+bloom it as a guest. That clean context is the point — a logged-in browser can
+never catch an auth wall creeping in front of the share page, which is exactly
+the regression that would kill growth silently.
+
+Chromium with a phone viewport rather than the WebKit iPhone preset: the preset
+needs a separate ~100MB download and system libraries that are not on every CI
+image, and a suite nobody can run is worth less than slightly lower engine
+fidelity.
+
 ## Useful commands
 
 ```bash

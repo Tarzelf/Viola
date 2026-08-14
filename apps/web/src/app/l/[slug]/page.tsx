@@ -153,7 +153,7 @@ export default async function SharePage({ params, searchParams }: PageProps) {
 
       {/* The prompt comes after they have seen the value, not before it. */}
       <section className="surface mt-9 px-5 py-6 text-center">
-        <p className="display text-[24px] text-white">Post your own fit</p>
+        <h2 className="display text-[24px] text-white">Post your own fit</h2>
         <p className="mx-auto mt-1.5 max-w-[300px] text-[14px] text-[var(--color-text-secondary)]">
           Viola names every piece, scores the look, and finds where to buy it.
         </p>

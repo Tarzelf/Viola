@@ -136,7 +136,7 @@ export function ReportMenu({ lookId, handle }: { lookId: string; handle: string 
 
             {view === 'done' && (
               <div className="px-6 py-9 text-center">
-                <p className="display text-[22px] text-white">Thanks for telling us</p>
+                <h2 className="display text-[22px] text-white">Thanks for telling us</h2>
                 <p className="mt-2 text-[14px] text-[var(--color-text-secondary)]">
                   A person reviews every report. We usually get to them within a day.
                 </p>

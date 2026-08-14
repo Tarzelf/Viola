@@ -40,7 +40,7 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
 
       {contents.items.length === 0 ? (
         <div className="surface px-6 py-16 text-center">
-          <p className="display text-[24px] text-white">Nothing saved yet</p>
+          <h2 className="display text-[24px] text-white">Nothing saved yet</h2>
           <p className="mt-2 text-[14px] text-[var(--color-text-secondary)]">
             Tap Save on any look or piece and it lands here.
           </p>

@@ -89,7 +89,7 @@ export default async function FeedPage({
 function EmptyFeed() {
   return (
     <div className="surface flex flex-col items-center justify-center px-6 py-20 text-center">
-      <p className="display text-[26px] text-white">Nothing here yet</p>
+      <h2 className="display text-[26px] text-white">Nothing here yet</h2>
       <p className="mt-2 max-w-sm text-[14px] text-[var(--color-text-secondary)]">
         Post a fit and Viola will name every piece, score the look, and show you where to buy it.
       </p>
