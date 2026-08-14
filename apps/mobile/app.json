@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "Viola",
+    "slug": "viola",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "viola",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "backgroundColor": "#0B0A0F",
+
+    "splash": {
+      "backgroundColor": "#0B0A0F",
+      "resizeMode": "contain"
+    },
+
+    "ios": {
+      "bundleIdentifier": "app.viola.ios",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:viola.app"],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Viola needs access to your photos so you can post a look.",
+        "NSCameraUsageDescription": "Viola needs the camera so you can take a photo of your fit.",
+        "UIViewControllerBasedStatusBarAppearance": false
+      }
+    },
+
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Viola needs access to your photos so you can post a look.",
+          "cameraPermission": "Viola needs the camera so you can take a photo of your fit."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": { "deploymentTarget": "16.4" }
+        }
+      ]
+    ],
+
+    "experiments": {
+      "typedRoutes": true
+    },
+
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "REPLACE_WITH_YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}

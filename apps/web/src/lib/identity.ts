@@ -1,6 +1,6 @@
 import 'server-only';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { resolveSession } from './auth';
 import { db } from './db';
 
@@ -75,7 +75,15 @@ export async function getViewer(): Promise<Viewer> {
   const jar = await cookies();
   const guestId = verify(jar.get(GUEST_COOKIE)?.value) ?? newGuestId();
 
-  const token = verify(jar.get(SESSION_COOKIE)?.value);
+  // The native app sends its session as a bearer token rather than a cookie.
+  // Cookie handling in React Native's fetch differs across platforms and is
+  // easy to get subtly wrong, so the header is the unambiguous path — and the
+  // token lives in the iOS keychain rather than in AsyncStorage.
+  const bearer = (await headers()).get('authorization');
+  const token = bearer?.startsWith('Bearer ')
+    ? bearer.slice(7)
+    : verify(jar.get(SESSION_COOKIE)?.value);
+
   if (!token) return { userId: null, guestId, isAuthenticated: false };
 
   const session = await resolveSession(await db(), token);

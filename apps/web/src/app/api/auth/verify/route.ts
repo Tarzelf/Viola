@@ -9,7 +9,13 @@ export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   const viewer = await getViewer();
-  const body = (await request.json().catch(() => ({}))) as { email?: string; code?: string };
+  const body = (await request.json().catch(() => ({}))) as {
+    email?: string;
+    code?: string;
+    // The native app cannot rely on a Set-Cookie, so it asks for the raw token
+    // and stores it in the keychain.
+    wantsToken?: boolean;
+  };
 
   try {
     const result = await verifyCode(await db(), {
@@ -40,6 +46,7 @@ export async function POST(request: Request) {
       // Surfaced so the UI can say "we kept your 3 blooms" — converting should
       // never feel like starting over.
       claimedBlooms: result.claimed.blooms,
+      ...(body.wantsToken ? { token: result.token } : {}),
     });
 
     const cookie = sessionCookie(result.token);

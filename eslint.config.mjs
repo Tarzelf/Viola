@@ -45,4 +45,11 @@ export default tseslint.config(
     files: ['**/scripts/**', '**/*.test.ts', '**/*.spec.ts', '**/vitest.setup.ts'],
     rules: { 'no-console': 'off' },
   },
+  {
+    // Metro resolves static assets through require(), and there is no ESM
+    // equivalent — `import font from './x.ttf'` does not give Metro the asset
+    // reference it needs. This is the one place require() is correct.
+    files: ['apps/mobile/**/*.ts', 'apps/mobile/**/*.tsx', '**/metro.config.js'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
 );
