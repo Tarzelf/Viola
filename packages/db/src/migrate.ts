@@ -29,8 +29,8 @@ export function loadMigrations(dir: string = MIGRATIONS_DIR): MigrationFile[] {
       const raw = readFileSync(join(dir, name), 'utf8');
       const statements = raw
         .split('--> statement-breakpoint')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0 && !s.startsWith('--'));
+        .map(stripLeadingComments)
+        .filter((s) => s.length > 0);
       return { name, statements };
     });
 }
@@ -47,6 +47,27 @@ export function rowsOf<T>(result: unknown): T[] {
     return (result as { rows: T[] }).rows;
   }
   return [];
+}
+
+/**
+ * Removes leading comment lines from a statement chunk.
+ *
+ * The original implementation discarded any chunk that *started* with `--`,
+ * which was fine for drizzle's generated output but silently dropped every
+ * hand-written migration that opens with an explanatory comment. The RLS
+ * migration lost all twenty-two of its ALTER statements that way, and
+ * reported success while doing it — the worst possible failure mode for a
+ * security control.
+ */
+function stripLeadingComments(chunk: string): string {
+  const lines = chunk.split('\n');
+  let start = 0;
+  while (start < lines.length) {
+    const line = lines[start]!.trim();
+    if (line.length === 0 || line.startsWith('--')) start++;
+    else break;
+  }
+  return lines.slice(start).join('\n').trim();
 }
 
 const JOURNAL = `
