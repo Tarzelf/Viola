@@ -143,13 +143,28 @@ export function SignInForm({ next = '/' }: { next?: string }) {
         </form>
       )}
 
-      {devCode && (
-        <div className="mt-5 rounded-[var(--radius-lg)] border border-[rgba(240,195,107,0.28)] bg-[rgba(240,195,107,0.07)] px-4 py-3">
+      {devCode && step === 'code' && (
+        <div className="mt-5 rounded-[var(--radius-lg)] border border-[rgba(240,195,107,0.28)] bg-[rgba(240,195,107,0.07)] px-4 py-4">
           <p className="label-caps text-[var(--color-warning)]">Development mode</p>
           <p className="mt-1.5 text-[13px] text-[var(--color-text-secondary)]">
-            No email provider configured, so your code is{' '}
-            <span className="stat text-white">{devCode}</span>
+            No email provider configured, so your code is:
           </p>
+          {/*
+            Shown large and widely spaced, with a button that fills it in.
+            QA misread a small mono code (168038 as 168838) and reported a
+            sign-in bug that did not exist — transcribing six digits by eye is
+            an unnecessary step, so the button removes it entirely.
+          */}
+          <p className="stat mt-2 text-[30px] leading-none tracking-[0.28em] text-white">
+            {devCode}
+          </p>
+          <button
+            type="button"
+            onClick={() => setCode(devCode)}
+            className="mt-3 rounded-full border border-[rgba(240,195,107,0.4)] px-3.5 py-2 text-[12px] font-medium text-[var(--color-warning)] transition-colors hover:bg-[rgba(240,195,107,0.1)]"
+          >
+            Use this code
+          </button>
         </div>
       )}
 
