@@ -92,12 +92,15 @@ function ItemAnnotation({
   const top = slot.rect.y0 * 100;
   const width = (slot.rect.x1 - slot.rect.x0) * 100;
 
-  // Leader line from the card edge to the garment it labels.
-  const lineFrom = slot.side === 'left' ? slot.rect.x1 : slot.anchor.x;
-  const lineTo = slot.side === 'left' ? slot.anchor.x : slot.rect.x0;
-  const lineLeft = Math.min(lineFrom, lineTo) * 100;
-  const lineWidth = Math.abs(lineTo - lineFrom) * 100;
+  // L-shaped leader: horizontal out from the card, then vertical to the
+  // garment. A single horizontal rule leaves a visible gap whenever the safe
+  // zone lifts a card away from the piece it labels.
+  const startX = slot.side === 'left' ? slot.rect.x1 : slot.rect.x0;
+  const lineLeft = Math.min(startX, slot.anchor.x) * 100;
+  const lineWidth = Math.abs(slot.anchor.x - startX) * 100;
   const lineTop = ((slot.rect.y0 + slot.rect.y1) / 2) * 100;
+  const dropTop = Math.min((slot.rect.y0 + slot.rect.y1) / 2, slot.anchor.y) * 100;
+  const dropHeight = Math.abs(slot.anchor.y - (slot.rect.y0 + slot.rect.y1) / 2) * 100;
 
   const delay = animate ? 180 + index * 90 : 0;
   const style = animate
@@ -113,6 +116,17 @@ function ItemAnnotation({
              line survives on both light and dark backgrounds. */
           className="absolute h-px bg-white/55 shadow-[0_1px_0_rgba(11,10,15,0.45)]"
           style={{ left: `${lineLeft}%`, top: `${lineTop}%`, width: `${lineWidth}%`, ...style }}
+        />
+      )}
+      {dropHeight > 0.5 && (
+        <div
+          className="absolute w-px bg-white/55 shadow-[1px_0_0_rgba(11,10,15,0.45)]"
+          style={{
+            left: `${slot.anchor.x * 100}%`,
+            top: `${dropTop}%`,
+            height: `${dropHeight}%`,
+            ...style,
+          }}
         />
       )}
       <div

@@ -8,39 +8,20 @@
  * network, which is the acceptance criterion for this phase.
  */
 import { getArchetype, scoreHeadline, formatPrice, formatItemLabel } from '@viola/core';
-import sharp from 'sharp';
 import { MemoryProductCache, runPipeline } from '../src/orchestrator';
-import { mockProviders, MockProductSearchProvider } from '../src/providers/index';
+import {
+  createFixtureFetch,
+  mockProviders,
+  MockProductSearchProvider,
+} from '../src/providers/index';
 import { solidImage } from '../src/imagery';
 
 const products = new MockProductSearchProvider();
 const providers = mockProviders({ products });
 const cache = new MemoryProductCache();
 
-/**
- * Stands in for a retailer CDN. Serves a synthetic catalogue image — a shape on
- * a white field, which is exactly the kind of photography the cutout trimmer is
- * built for — so the imagery stage is genuinely exercised offline.
- */
-const fetchImpl = (async (input: string | URL | Request) => {
-  const url = String(input);
-  const png = await sharp({
-    create: { width: 600, height: 600, channels: 3, background: { r: 255, g: 255, b: 255 } },
-  })
-    .composite([
-      {
-        input: Buffer.from(
-          `<svg width="600" height="600"><ellipse cx="300" cy="300" rx="210" ry="130" fill="#6C63FF"/></svg>`,
-        ),
-      },
-    ])
-    .png()
-    .toBuffer();
-  return new Response(new Uint8Array(png), {
-    status: url.includes('cdn.example.com') ? 200 : 404,
-    headers: { 'content-type': 'image/png' },
-  });
-}) as typeof fetch;
+// Serves the fixture catalogue images the mock provider points at.
+const fetchImpl = createFixtureFetch();
 
 // A stand-in for a mirror selfie. The mock vision provider keys off the image
 // bytes, so this deterministically selects one of the outfit fixtures.

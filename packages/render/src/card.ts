@@ -83,26 +83,54 @@ function itemCard(item: CardItem, slot: LookLayout['slots'][number], W: number, 
   const nodes: Node[] = [];
 
   // --- leader line to the garment -----------------------------------------
-  // Drawn as a thin absolutely-positioned block rather than an SVG line:
-  // satori has no line primitive, and a 1px div is crisper at these sizes.
+  //
+  // An L: horizontal out from the card, then vertical to the garment.
+  //
+  // A single horizontal line was tried first and looked broken whenever the
+  // bottom safe zone lifted a card away from the piece it labels — the shoe
+  // card in particular ended up with a line stopping in mid-air well above its
+  // dot. The elbow always reaches, and reads as deliberate draughting rather
+  // than as a misaligned rule.
+  //
+  // Drawn with 1px divs because satori has no line primitive, and at these
+  // sizes a div is crisper than a stroked path anyway.
+  const stroke = 'rgba(255,255,255,0.55)';
   const startX = slot.side === 'left' ? slot.rect.x1 : slot.rect.x0;
   const anchorX = slot.anchor.x;
+  const anchorY = slot.anchor.y;
   const lineY = (slot.rect.y0 + slot.rect.y1) / 2;
-  const lineLeft = Math.min(startX, anchorX) * W;
-  const lineWidth = Math.abs(anchorX - startX) * W;
 
-  if (lineWidth > 4) {
+  const runLeft = Math.min(startX, anchorX) * W;
+  const runWidth = Math.abs(anchorX - startX) * W;
+
+  if (runWidth > 4) {
     nodes.push(
       el('div', {
         style: {
           position: 'absolute',
-          left: px(lineLeft),
+          left: px(runLeft),
           top: px(lineY * H),
-          width: px(lineWidth),
+          width: px(runWidth),
           height: '1px',
-          // Matched to the web card after visual QA found the original too
-          // faint to trace against a busy photograph.
-          backgroundColor: 'rgba(255,255,255,0.55)',
+          backgroundColor: stroke,
+        },
+      }),
+    );
+  }
+
+  const dropTop = Math.min(lineY, anchorY) * H;
+  const dropHeight = Math.abs(anchorY - lineY) * H;
+
+  if (dropHeight > 4) {
+    nodes.push(
+      el('div', {
+        style: {
+          position: 'absolute',
+          left: px(anchorX * W),
+          top: px(dropTop),
+          width: '1px',
+          height: px(dropHeight),
+          backgroundColor: stroke,
         },
       }),
     );

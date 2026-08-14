@@ -41,6 +41,12 @@ export interface CachedProduct {
   priceCents: number | null;
   currency: string;
   imagePath: string | null;
+  /**
+   * The retailer's original image URL, kept so a cutout that failed to fetch
+   * can be retried later. Without it, one transient CDN blip would leave a
+   * product permanently imageless for every future look that matches it.
+   */
+  imageSourceUrl: string | null;
   rating: number | null;
   reviewCount: number | null;
 }
@@ -240,7 +246,25 @@ export async function runPipeline(input: RunPipelineInput): Promise<PipelineResu
       // per look — this is the single biggest lever on per-look cost.
       const cached = await cache?.get(hash);
       if (cached) {
-        out.push({ ...base, product: cached, title: cached.title });
+        let product = cached;
+
+        // Repair a cached entry whose image fetch failed previously. Cheap:
+        // no search call, just one image request.
+        if (!product.imagePath && product.imageSourceUrl) {
+          const repaired = await fetchCutout(
+            { imageUrl: product.imageSourceUrl, title: product.title } as ProductCandidate,
+            hash,
+            providers,
+            warnings,
+            fetchImpl,
+          );
+          if (repaired) {
+            product = { ...product, imagePath: repaired };
+            await cache?.set(hash, product);
+          }
+        }
+
+        out.push({ ...base, product, title: product.title });
         continue;
       }
 
@@ -283,6 +307,7 @@ export async function runPipeline(input: RunPipelineInput): Promise<PipelineResu
         priceCents: candidate.priceCents,
         currency: candidate.currency,
         imagePath,
+        imageSourceUrl: candidate.imageUrl,
         rating: candidate.rating,
         reviewCount: candidate.reviewCount,
       };

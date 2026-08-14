@@ -14,7 +14,7 @@ import {
 let catalogueImage: Buffer;
 const fetchImpl = (async (input: string | URL | Request) => {
   const url = String(input);
-  if (!url.includes('cdn.example.com')) return new Response(null, { status: 404 });
+  if (!url.includes('cdn.viola-fixtures.test')) return new Response(null, { status: 404 });
   return new Response(new Uint8Array(catalogueImage), {
     status: 200,
     headers: { 'content-type': 'image/png' },
@@ -111,6 +111,46 @@ describe('runPipeline', () => {
     // A viral item resolves once for everyone, not once per look.
     expect(products.calls.length).toBe(afterFirst);
     expect(cache.hits).toBeGreaterThan(0);
+  });
+
+  it('repairs a cached product whose image failed to fetch the first time', async () => {
+    // Found in the running app: an early upload cached products while the
+    // fixture CDN was unreachable, and every later look reusing that cache
+    // entry inherited the missing image permanently. One transient blip should
+    // not leave a product imageless forever, so a cache hit with no image
+    // retries the fetch — cheap, since it skips the search entirely.
+    const products = new MockProductSearchProvider();
+    const cache = new MemoryProductCache();
+    const storage = new MemoryStorageProvider();
+
+    // First run with a dead CDN: products resolve, images do not.
+    const broken = await runPipeline({
+      lookId: 'repair-1',
+      image: photo,
+      providers: mockProviders({ products, storage }),
+      cache,
+      fetchImpl: failingFetch,
+    });
+    expect(broken.items.filter((i) => i.product).length).toBeGreaterThan(0);
+    expect(broken.items.every((i) => i.product?.imagePath == null)).toBe(true);
+
+    const searchesAfterFirst = products.calls.length;
+
+    // Second run with the CDN back. No new searches, but images appear.
+    const repaired = await runPipeline({
+      lookId: 'repair-2',
+      image: photo,
+      providers: mockProviders({ products, storage }),
+      cache,
+      fetchImpl,
+    });
+
+    expect(products.calls.length).toBe(searchesAfterFirst);
+    const withImages = repaired.items.filter((i) => i.product?.imagePath);
+    expect(withImages.length).toBeGreaterThan(0);
+    for (const item of withImages) {
+      expect(await storage.exists(item.product!.imagePath!)).toBe(true);
+    }
   });
 
   it('respects the per-look search budget', async () => {

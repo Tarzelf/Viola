@@ -18,6 +18,7 @@ export * from './types';
 export * from './vision/mock';
 export * from './vision/gemini';
 export * from './product/mock';
+export * from './product/fixtures';
 export * from './product/serpapi';
 export * from './affiliate/index';
 export * from './storage/index';

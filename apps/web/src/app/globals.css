@@ -192,3 +192,12 @@
 .animate-pop {
   animation: viola-pop var(--duration-normal) var(--ease-bouncy) both;
 }
+
+@keyframes viola-scan {
+  0% {
+    transform: translateY(-40%);
+  }
+  100% {
+    transform: translateY(300%);
+  }
+}
