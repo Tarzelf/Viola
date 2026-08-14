@@ -146,9 +146,11 @@ function Annotation({
           left,
           top,
           width: boxWidth,
-          height: boxHeight,
+          // Deliberately no fixed height. A hard height with overflow:hidden
+          // clipped long names mid-word ("STRUCTURED ED-") rather than letting
+          // them ellipsise, which looks like a rendering fault.
+          maxHeight: boxHeight,
           alignItems: 'center',
-          overflow: 'hidden',
         }}
       >
         {item.imagePath && (
@@ -161,12 +163,14 @@ function Annotation({
         )}
         <Text
           numberOfLines={1}
+          ellipsizeMode="tail"
           style={{ ...typeStyle('itemLabel'), color: '#fff', textAlign: 'center' }}
         >
           {label.brand}
         </Text>
         <Text
           numberOfLines={2}
+          ellipsizeMode="tail"
           style={{
             ...typeStyle('itemLabelSub'),
             color: 'rgba(255,255,255,0.78)',

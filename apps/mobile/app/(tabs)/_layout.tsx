@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { Platform, Text, View, type ColorValue } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { theme, typeStyle } from '@/theme';
@@ -11,6 +11,8 @@ import { theme, typeStyle } from '@/theme';
  * they opened the app for.
  */
 export default function TabsLayout() {
+  const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
@@ -44,6 +46,17 @@ export default function TabsLayout() {
         options={{
           title: '',
           tabBarIcon: () => <PostButton />,
+        }}
+        listeners={{
+          tabPress: (event) => {
+            // Present the composer as a modal instead of navigating to a tab.
+            // Routing to a tab that immediately redirects left the navigator
+            // with nothing to go back to, so Close warned about an unhandled
+            // GO_BACK and the tab bar flickered on the way out.
+            event.preventDefault();
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/new');
+          },
         }}
       />
       <Tabs.Screen

@@ -1,20 +1,13 @@
-import { useEffect } from 'react';
 import { View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { theme } from '@/theme';
 
 /**
- * The centre tab is a launcher, not a destination.
+ * Placeholder for the centre tab.
  *
- * Posting opens as a modal so the reveal owns the whole screen — it is the
- * moment the product sells itself and should not share space with a tab bar.
+ * Never actually rendered: the tab bar intercepts the press and presents /new
+ * as a modal instead, so the reveal owns the whole screen. The file exists
+ * because expo-router derives the tab from it.
  */
 export default function PostTab() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/new');
-  }, [router]);
-
   return <View style={{ flex: 1, backgroundColor: theme.color.ink }} />;
 }

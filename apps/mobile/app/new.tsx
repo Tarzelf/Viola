@@ -171,6 +171,17 @@ export default function NewLookScreen() {
     pollRef.current = null;
   }
 
+  /**
+   * The composer can be opened as the very first route — from a deep link, or
+   * on a cold start — in which case there is nothing to go back to and
+   * router.back() logs an unhandled GO_BACK. Fall back to the feed.
+   */
+  function close() {
+    stop();
+    if (router.canGoBack()) router.back();
+    else router.replace('/');
+  }
+
   const cardWidth = width - 32;
 
   return (
@@ -182,7 +193,7 @@ export default function NewLookScreen() {
         paddingHorizontal: 16,
       }}
     >
-      <Pressable onPress={() => router.back()} hitSlop={12} style={{ alignSelf: 'flex-start' }}>
+      <Pressable onPress={close} hitSlop={12} style={{ alignSelf: 'flex-start' }}>
         <Text style={{ color: theme.color.textSecondary, fontSize: 15 }}>Close</Text>
       </Pressable>
 
