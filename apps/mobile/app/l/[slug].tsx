@@ -148,7 +148,7 @@ export default function LookScreen() {
             justifyContent: 'center',
           }}
         >
-          <Text style={{ ...typeStyle('bodySm'), color: theme.color.viola }}>
+          <Text style={{ ...typeStyle('bodySm'), color: theme.color.violaText }}>
             {look.handle.slice(0, 1).toUpperCase()}
           </Text>
         </View>

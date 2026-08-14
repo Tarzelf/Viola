@@ -76,7 +76,7 @@ export function SaveButton({
           'inline-flex items-center gap-2 rounded-full border transition-all active:scale-[0.96]',
           compact ? 'px-3 py-2 text-[12px]' : 'px-4 py-3 text-[14px]',
           saved
-            ? 'border-transparent bg-[var(--color-viola-soft)] text-[var(--color-viola)]'
+            ? 'border-transparent bg-[var(--color-viola-soft)] text-[var(--color-viola-text)]'
             : 'border-[var(--color-hairline)] text-[var(--color-text-secondary)] hover:border-[rgba(124,92,252,0.4)] hover:text-white',
         ].join(' ')}
       >

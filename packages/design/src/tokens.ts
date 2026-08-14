@@ -39,6 +39,15 @@ export const color = {
   viola: '#7C5CFC',
   violaPressed: '#6A49F0',
   violaSoft: 'rgba(124, 92, 252, 0.14)',
+  /**
+   * The accent, lightened for use AS TEXT.
+   *
+   * #7C5CFC is correct as a fill with white on top, but measured against the
+   * surface colour it lands at 4.22:1 — under WCAG AA for body text. Rather
+   * than compromise the brand fill, text uses this lighter tint (5.15:1 on
+   * surface). Never use it as a background.
+   */
+  violaText: '#8B70FF',
 
   /**
    * Secondary hues. GRADIENTS AND GLOWS ONLY — never as UI chrome, never as a
@@ -54,7 +63,10 @@ export const color = {
   // Text
   textPrimary: '#FBF9FB',
   textSecondary: 'rgba(251, 249, 251, 0.68)',
-  textTertiary: 'rgba(251, 249, 251, 0.44)',
+  // 0.44 measured at 4.20:1 on the canvas — under AA, and this carries the
+  // footer, view counts and captions. 0.48 clears it at 4.81:1 while still
+  // reading as clearly de-emphasised.
+  textTertiary: 'rgba(251, 249, 251, 0.48)',
   textInverse: '#0B0A0F',
 
   // Lines

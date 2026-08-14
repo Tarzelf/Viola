@@ -56,7 +56,7 @@ function Row({ label, value, detail }: { label: string; value: string; detail: s
       <p className="label-caps text-[var(--color-text-tertiary)]">{label}</p>
       <a
         href={`mailto:${value}`}
-        className="mt-1.5 block text-[16px] font-semibold text-[var(--color-viola)] hover:underline"
+        className="mt-1.5 block text-[16px] font-semibold text-[var(--color-viola-text)] hover:underline"
       >
         {value}
       </a>

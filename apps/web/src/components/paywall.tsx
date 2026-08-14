@@ -61,7 +61,7 @@ export function Paywall({ open, onClose, title, body }: PaywallProps) {
         aria-labelledby="paywall-title"
         className="animate-rise relative w-full max-w-[420px] rounded-t-[var(--radius-xl)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-6 pt-7 pb-8 sm:rounded-[var(--radius-xl)]"
       >
-        <p className="label-caps text-[var(--color-viola)]">Viola Plus</p>
+        <p className="label-caps text-[var(--color-viola-text)]">Viola Plus</p>
         <h2 id="paywall-title" className="display mt-2 text-[28px] leading-tight text-white">
           {title}
         </h2>

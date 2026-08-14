@@ -56,7 +56,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ handle
   return (
     <AppShell>
       <header className="mb-8 flex items-start gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[22px] font-semibold text-[var(--color-viola)]">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[22px] font-semibold text-[var(--color-viola-text)]">
           {handle.slice(0, 1).toUpperCase()}
         </div>
 

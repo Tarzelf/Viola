@@ -54,7 +54,22 @@ export default async function VaultsPage() {
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
               ) : (
-                <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_20%_0%,rgba(124,92,252,0.16),transparent_60%)]" />
+                /* An empty vault used to render as a bare dark tile, which
+                   reads as a loading failure rather than as "nothing here
+                   yet". A wash and a hint make the state legible. */
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(120%_120%_at_20%_0%,rgba(124,92,252,0.16),transparent_60%)]">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1Z"
+                      stroke="var(--color-viola-text)"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <p className="mt-2 px-4 text-center text-[12px] text-[var(--color-text-tertiary)]">
+                    Tap Save on any look to fill this
+                  </p>
+                </div>
               )}
               <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent to-[rgba(11,10,15,0.9)]" />
               <div className="absolute right-4 bottom-4 left-4">

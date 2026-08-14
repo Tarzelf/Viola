@@ -43,7 +43,7 @@ export default async function PlusPage({
           </div>
         )}
 
-        <p className="label-caps text-[var(--color-viola)]">Viola Plus</p>
+        <p className="label-caps text-[var(--color-viola-text)]">Viola Plus</p>
         <h1 className="display mt-2 text-[38px] leading-[1.1] text-white">
           Keep everything you love
         </h1>

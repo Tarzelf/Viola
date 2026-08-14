@@ -62,7 +62,7 @@ export default async function SettingsPage() {
           <p className="label-caps text-[var(--color-text-tertiary)]">Help</p>
           <Link
             href="/contact"
-            className="mt-2 block text-[14px] text-[var(--color-viola)] hover:underline"
+            className="mt-2 block text-[14px] text-[var(--color-viola-text)] hover:underline"
           >
             Contact us
           </Link>

@@ -24,7 +24,7 @@ export function AccountMenu({ handle }: { handle: string }) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Account menu for @${handle}`}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[13px] font-semibold text-[var(--color-viola)] transition-transform active:scale-[0.94]"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[13px] font-semibold text-[var(--color-viola-text)] transition-transform active:scale-[0.94]"
       >
         {handle.slice(0, 1).toUpperCase()}
       </button>

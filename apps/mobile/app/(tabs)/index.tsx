@@ -51,7 +51,7 @@ export default function FeedScreen() {
     <View style={{ flex: 1, backgroundColor: theme.color.ink, paddingTop: insets.top }}>
       <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
         <Text style={{ ...typeStyle('displayLg'), color: '#fff' }}>
-          Viola<Text style={{ color: theme.color.viola }}>.</Text>
+          Viola<Text style={{ color: theme.color.violaText }}>.</Text>
         </Text>
 
         <View style={{ flexDirection: 'row', gap: 6, marginTop: 12 }}>

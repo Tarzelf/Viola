@@ -97,7 +97,7 @@ export default async function SharePage({ params, searchParams }: PageProps) {
       {/* Referrer context. A shared link that says who sent it and why
           converts considerably better than a cold landing. */}
       <div className="mb-4 flex items-center gap-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[13px] font-semibold text-[var(--color-viola)]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-viola-soft)] text-[13px] font-semibold text-[var(--color-viola-text)]">
           {look.handle.slice(0, 1).toUpperCase()}
         </div>
         <p className="flex-1 text-[14px] text-[var(--color-text-secondary)]">

@@ -80,7 +80,7 @@ export default async function ModerationPage() {
                     {report.lookSlug && (
                       <Link
                         href={`/l/${report.lookSlug}`}
-                        className="mt-1.5 inline-block text-[12px] text-[var(--color-viola)] hover:underline"
+                        className="mt-1.5 inline-block text-[12px] text-[var(--color-viola-text)] hover:underline"
                       >
                         View look
                       </Link>

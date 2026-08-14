@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { AA_LARGE, AA_NORMAL, contrastRatio } from './contrast';
 import { buildCssVars, renderThemeCss } from './css';
 import { buildTextStyles, revealDelay, spring, textStyle } from './native';
 import { color, gradient, motion, radius, shadow, type } from './tokens';
@@ -130,5 +131,58 @@ describe('brand guardrails', () => {
     for (const value of Object.values(motion.easing)) {
       expect(value.startsWith('cubic-bezier(')).toBe(true);
     }
+  });
+});
+
+/**
+ * Contrast is measured, not eyeballed.
+ *
+ * Most text here is translucent white over a near-black canvas, and
+ * translucency makes contrast very easy to misjudge: the colour looks fine in
+ * isolation and fails once composited. A design review flagged the footer as
+ * hard to read and the measurement agreed — 4.20:1, under AA.
+ */
+describe('contrast', () => {
+  const surfaces: Array<[string, string]> = [
+    ['ink', color.ink],
+    ['surface', color.surface],
+  ];
+
+  it('meets WCAG AA for every text colour on every surface', () => {
+    const textColors: Array<[string, string]> = [
+      ['textPrimary', color.textPrimary],
+      ['textSecondary', color.textSecondary],
+      ['textTertiary', color.textTertiary],
+      ['violaText', color.violaText],
+      ['danger', color.danger],
+      ['gold', color.gold],
+    ];
+
+    for (const [name, value] of textColors) {
+      for (const [surfaceName, background] of surfaces) {
+        const ratio = contrastRatio(value, background);
+        expect(
+          ratio,
+          `${name} on ${surfaceName} is ${ratio.toFixed(2)}:1, below AA`,
+        ).toBeGreaterThanOrEqual(AA_NORMAL);
+      }
+    }
+  });
+
+  it('keeps white legible on the accent fill', () => {
+    // The score pill and primary buttons are white on violet.
+    expect(contrastRatio('#FFFFFF', color.viola)).toBeGreaterThanOrEqual(AA_LARGE);
+  });
+
+  it('has a text-safe variant of the accent distinct from the fill', () => {
+    // The brand fill stays #7C5CFC; only the text tint is lightened.
+    expect(color.viola).toBe('#7C5CFC');
+    expect(color.violaText).not.toBe(color.viola);
+    expect(contrastRatio(color.violaText, color.surface)).toBeGreaterThanOrEqual(AA_NORMAL);
+  });
+
+  it('composites translucency rather than judging the raw colour', () => {
+    // rgba(255,255,255,0.1) looks like white but is nearly invisible on black.
+    expect(contrastRatio('rgba(255, 255, 255, 0.1)', color.ink)).toBeLessThan(AA_NORMAL);
   });
 });

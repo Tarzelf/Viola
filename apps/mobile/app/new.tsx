@@ -227,7 +227,7 @@ export default function NewLookScreen() {
                 justifyContent: 'center',
               }}
             >
-              <Text style={{ color: theme.color.viola, fontSize: 22 }}>↑</Text>
+              <Text style={{ color: theme.color.violaText, fontSize: 22 }}>↑</Text>
             </View>
             <Text style={{ ...typeStyle('titleSm'), color: '#fff', marginTop: 14 }}>
               Choose a photo
@@ -394,7 +394,7 @@ export default function NewLookScreen() {
                     justifyContent: 'center',
                   }}
                 >
-                  <Text style={{ color: theme.color.viola, fontSize: 12 }}>✓</Text>
+                  <Text style={{ color: theme.color.violaText, fontSize: 12 }}>✓</Text>
                 </View>
                 <Text
                   numberOfLines={1}

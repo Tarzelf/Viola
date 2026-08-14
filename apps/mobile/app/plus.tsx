@@ -46,7 +46,7 @@ export default function PlusScreen() {
         <Text style={{ color: theme.color.textSecondary, fontSize: 15 }}>Close</Text>
       </Pressable>
 
-      <Text style={{ ...typeStyle('itemLabel'), color: theme.color.viola, marginTop: 22 }}>
+      <Text style={{ ...typeStyle('itemLabel'), color: theme.color.violaText, marginTop: 22 }}>
         VIOLA PLUS
       </Text>
       <Text style={{ ...typeStyle('displayLg'), color: '#fff', marginTop: 8 }}>
@@ -71,7 +71,7 @@ export default function PlusScreen() {
                 marginTop: 2,
               }}
             >
-              <Text style={{ color: theme.color.viola, fontSize: 11 }}>✓</Text>
+              <Text style={{ color: theme.color.violaText, fontSize: 11 }}>✓</Text>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ ...typeStyle('titleSm'), color: '#fff' }}>{title}</Text>
@@ -153,7 +153,7 @@ function PlanCard({
       }}
     >
       {badge && (
-        <Text style={{ ...typeStyle('itemLabel'), fontSize: 10, color: theme.color.viola }}>
+        <Text style={{ ...typeStyle('itemLabel'), fontSize: 10, color: theme.color.violaText }}>
           {badge.toUpperCase()}
         </Text>
       )}

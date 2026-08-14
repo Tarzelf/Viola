@@ -12,12 +12,13 @@
   --color-viola: #7C5CFC;
   --color-viola-pressed: #6A49F0;
   --color-viola-soft: rgba(124, 92, 252, 0.14);
+  --color-viola-text: #8B70FF;
   --color-orchid: #E9A9FF;
   --color-blush: #FFB4C8;
   --color-gold: #E8C878;
   --color-text-primary: #FBF9FB;
   --color-text-secondary: rgba(251, 249, 251, 0.68);
-  --color-text-tertiary: rgba(251, 249, 251, 0.44);
+  --color-text-tertiary: rgba(251, 249, 251, 0.48);
   --color-text-inverse: #0B0A0F;
   --color-hairline: rgba(255, 255, 255, 0.08);
   --color-hairline-strong: rgba(255, 255, 255, 0.14);
