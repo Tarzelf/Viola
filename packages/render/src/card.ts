@@ -1,4 +1,4 @@
-import { formatItemLabel, formatPrice, type LookLayout } from '@viola/core';
+import { formatItemLabel, formatPrice, truncateLabel, type LookLayout } from '@viola/core';
 import { color, type as typeScale } from '@viola/design';
 
 /**
@@ -52,22 +52,8 @@ const el = (type: string, props: Record<string, unknown>, children?: unknown): N
 
 const px = (n: number) => `${n}px`;
 
-/**
- * Caps a label so it cannot overflow its slot.
- *
- * Retailer titles run long ("Structured Leather Tote Bag, Black"), and a label
- * that wraps to three lines or spills past the card edge undoes the precision
- * the rest of the layout is working for. The reference labels are all short —
- * "HOKA SKYWARD X BLUE" — so this matches that discipline. Breaks on a word
- * boundary where possible rather than mid-word.
- */
-export function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  const clipped = value.slice(0, max - 1);
-  const lastSpace = clipped.lastIndexOf(' ');
-  const base = lastSpace > max * 0.55 ? clipped.slice(0, lastSpace) : clipped.trimEnd();
-  return `${base}…`;
-}
+/** Re-exported so existing imports keep working. */
+export const truncate = truncateLabel;
 
 // ---------------------------------------------------------------------------
 
@@ -79,7 +65,7 @@ function itemCard(item: CardItem, slot: LookLayout['slots'][number], W: number, 
   const h = (slot.rect.y1 - slot.rect.y0) * H;
 
   const raw = formatItemLabel(item);
-  const label = { brand: truncate(raw.brand, 18), name: truncate(raw.name, 26) };
+  const label = { brand: truncateLabel(raw.brand, 18), name: truncateLabel(raw.name, 26) };
   const nodes: Node[] = [];
 
   // --- leader line to the garment -----------------------------------------

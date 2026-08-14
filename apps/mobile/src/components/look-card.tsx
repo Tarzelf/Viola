@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, Text, View, type ViewStyle } from 'react-native';
-import { formatItemLabel, formatPrice } from '@viola/core';
+import { formatItemLabel, formatPrice, labelCharBudget, truncateLabel } from '@viola/core';
 import { api, type LookDetail } from '@/api';
 import { theme, typeStyle } from '@/theme';
 
@@ -95,12 +95,21 @@ function Annotation({
   width: number;
   height: number;
 }) {
-  const label = formatItemLabel(item);
+  const raw = formatItemLabel(item);
 
   const left = slot.rect.x0 * width;
   const top = slot.rect.y0 * height;
   const boxWidth = (slot.rect.x1 - slot.rect.x0) * width;
   const boxHeight = (slot.rect.y1 - slot.rect.y0) * height;
+
+  // Cap the text to what the slot can actually hold. Relying on numberOfLines
+  // alone is not enough: a single long word gets split across lines as
+  // "STRUCTUR" / "ED…", which reads as broken rather than as truncated.
+  const budget = labelCharBudget(boxWidth);
+  const label = {
+    brand: truncateLabel(raw.brand, budget),
+    name: truncateLabel(raw.name, budget * 2),
+  };
 
   // L-shaped connector: out from the card, then down (or up) to the garment.
   const startX = slot.side === 'left' ? slot.rect.x1 : slot.rect.x0;

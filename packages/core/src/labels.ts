@@ -101,3 +101,39 @@ export function formatItemLine(input: {
   const label = formatItemLabel(input);
   return [label.brand, label.name].filter(Boolean).join(' ');
 }
+
+/**
+ * Caps a label so it cannot overflow its slot.
+ *
+ * Shared by the web card, the native card and the server-side renderer — the
+ * same product name has to break identically in all three, or a share card
+ * stops matching the app it came from.
+ *
+ * Breaks on a word boundary where possible. A hard character cut is the
+ * fallback, but it is genuinely worse: React Native will happily split a long
+ * word across two lines as "STRUCTUR" / "ED…", which reads as a rendering
+ * fault rather than as deliberate truncation.
+ */
+export function truncateLabel(value: string, max: number): string {
+  if (value.length <= max) return value;
+
+  const clipped = value.slice(0, max - 1);
+  const lastSpace = clipped.lastIndexOf(' ');
+  const base = lastSpace > max * 0.55 ? clipped.slice(0, lastSpace) : clipped.trimEnd();
+  return `${base}\u2026`;
+}
+
+/**
+ * How many characters fit a label slot.
+ *
+ * The annotation boxes are narrow — roughly a quarter of the frame — and the
+ * signature ALL-CAPS treatment carries wide letter-spacing, so far less text
+ * fits than the raw pixel width suggests. Deriving the cap from the slot width
+ * keeps a phone and a 1080px share card from disagreeing about where a name
+ * should stop.
+ */
+export function labelCharBudget(slotWidthPx: number): number {
+  // ~7.5px per character at 11-12px with 2-3px tracking, measured against the
+  // rendered cards rather than computed from font metrics.
+  return Math.max(8, Math.floor(slotWidthPx / 7.5));
+}

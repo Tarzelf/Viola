@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatItemLabel, formatPrice } from '@viola/core';
+import { formatItemLabel, formatPrice, truncateLabel } from '@viola/core';
 import type { LookItemView, LookView } from '@/lib/queries';
 import { mediaUrl } from '@/lib/media';
 import { formatCount } from '@/lib/format';
@@ -87,7 +87,10 @@ function ItemAnnotation({
   index: number;
   animate: boolean;
 }) {
-  const label = formatItemLabel(item);
+  const raw = formatItemLabel(item);
+  // Same rule the native card and the server renderer use, so a shared card
+  // always matches the page it came from.
+  const label = { brand: truncateLabel(raw.brand, 18), name: truncateLabel(raw.name, 26) };
   const left = slot.rect.x0 * 100;
   const top = slot.rect.y0 * 100;
   const width = (slot.rect.x1 - slot.rect.x0) * 100;

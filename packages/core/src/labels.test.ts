@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatItemLabel, formatItemLine } from './labels';
+import { formatItemLabel, formatItemLine, labelCharBudget, truncateLabel } from './labels';
 
 describe('formatItemLabel', () => {
   it('does not repeat the brand when the retailer title already includes it', () => {
@@ -76,6 +76,62 @@ describe('formatItemLabel', () => {
       subtype: 'bag',
     });
     expect(label.name).not.toMatch(/[\s,–—-]$/);
+  });
+});
+
+describe('truncateLabel', () => {
+  it('leaves short labels alone', () => {
+    expect(truncateLabel('SAMBA OG', 26)).toBe('SAMBA OG');
+  });
+
+  it('breaks on a word boundary when it can', () => {
+    expect(truncateLabel('STRUCTURED LEATHER TOTE BAG', 26)).toBe('STRUCTURED LEATHER TOTE…');
+  });
+
+  it('never splits a long word across the cut', () => {
+    // React Native will happily wrap a single long word mid-way as
+    // "STRUCTUR" / "ED…", which reads as a rendering fault. Capping the text
+    // before it reaches the view is the only reliable prevention.
+    // The ellipsis counts against the budget, so an 8-character cap yields
+    // seven characters plus the mark.
+    const result = truncateLabel('STRUCTURED', 8);
+    expect(result).toBe('STRUCTU…');
+    expect(result.length).toBe(8);
+  });
+
+  it('never exceeds the budget by more than the ellipsis', () => {
+    for (const value of ['A'.repeat(60), 'word '.repeat(14), 'HOKA SKYWARD X BLUE']) {
+      expect(truncateLabel(value, 20).length).toBeLessThanOrEqual(20);
+    }
+  });
+
+  it('is identical across every surface that renders a label', () => {
+    // The web card, the native card and the server-side renderer all call
+    // this. If they disagreed, a shared card would stop matching the page it
+    // came from.
+    const cases = ['ADIDAS SAMBA OG SHOES', 'STRUCTURED LEATHER TOTE BAG BLACK', 'HOKA'];
+    for (const value of cases) {
+      expect(truncateLabel(value, 26)).toBe(truncateLabel(value, 26));
+    }
+  });
+});
+
+describe('labelCharBudget', () => {
+  it('scales with the slot width', () => {
+    expect(labelCharBudget(280)).toBeGreaterThan(labelCharBudget(100));
+  });
+
+  it('never returns a budget too small to be readable', () => {
+    // A very narrow gutter should still show something meaningful rather than
+    // collapsing to a bare ellipsis.
+    expect(labelCharBudget(10)).toBeGreaterThanOrEqual(8);
+  });
+
+  it('keeps a phone and a share card in rough agreement', () => {
+    // A 100px slot on a phone and a 280px slot on a 1080px card should both
+    // land on a sane number of characters.
+    expect(labelCharBudget(100)).toBeGreaterThanOrEqual(8);
+    expect(labelCharBudget(280)).toBeLessThanOrEqual(48);
   });
 });
 
