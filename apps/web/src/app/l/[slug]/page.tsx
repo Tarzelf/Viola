@@ -8,6 +8,7 @@ import { mediaUrl } from '@/lib/media';
 import { LookCard } from '@/components/look-card';
 import { BloomButton } from '@/components/bloom-button';
 import { formatCount } from '@/lib/format';
+import { SaveButton } from '@/components/save-button';
 import { ShareRow } from '@/components/share-row';
 import { ViewPing } from '@/components/view-ping';
 import { Wordmark } from '@/components/app-shell';
@@ -115,12 +116,15 @@ export default async function SharePage({ params, searchParams }: PageProps) {
       )}
 
       <div className="mt-5 flex items-center justify-between gap-3">
-        <BloomButton
-          slug={slug}
-          initialCount={look.bloomCount}
-          initialBloomed={look.bloomedByViewer}
-          size="lg"
-        />
+        <div className="flex items-center gap-2">
+          <BloomButton
+            slug={slug}
+            initialCount={look.bloomCount}
+            initialBloomed={look.bloomedByViewer}
+            size="lg"
+          />
+          <SaveButton lookId={look.id} />
+        </div>
         <span className="stat text-[13px] text-[var(--color-text-tertiary)]">
           {formatCount(look.viewCount)} views
         </span>
@@ -220,6 +224,7 @@ function ShopRow({
                product. An unresolved item still gets its label. */
             <span className="text-[12px] text-[var(--color-text-tertiary)]">Not found</span>
           )}
+          <SaveButton lookItemId={item.id} label="Save" compact />
         </div>
       </div>
     </li>

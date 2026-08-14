@@ -2,6 +2,8 @@ import { after, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { attachGuestCookie, getViewer } from '@/lib/identity';
 import { createLook, processLook } from '@/lib/create-look';
+import { assertWithinQuota, recordLookTagged } from '@/lib/entitlements';
+import { isViolaError } from '@viola/core';
 
 export const runtime = 'nodejs';
 /** Vision plus product resolution can take a while on live providers. */
@@ -53,9 +55,19 @@ export async function POST(request: Request) {
   }
   const userId = viewer.userId;
 
+  // Checked before anything paid runs. Each look is roughly one vision call
+  // plus a few product searches, so an unbounded free tier is an unbounded bill.
+  try {
+    await assertWithinQuota(database, userId);
+  } catch (error) {
+    if (isViolaError(error)) return NextResponse.json(error.toJSON(), { status: error.status });
+    throw error;
+  }
+
   const caption =
     typeof form?.get('caption') === 'string' ? String(form.get('caption')) : undefined;
   const { lookId, slug } = await createLook(database, { userId, caption });
+  await recordLookTagged(database, userId);
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const mimeType = file.type || 'image/jpeg';
