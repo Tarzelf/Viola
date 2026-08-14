@@ -1,6 +1,6 @@
 # Viola
 
-**Post your fit, and *voilà*: every piece identified, scored, and shoppable.**
+**Post your fit, and _voilà_: every piece identified, scored, and shoppable.**
 
 Upload a mirror selfie. Viola identifies each garment, finds the real product
 (clean catalogue image, price, where to buy), lays it out around your photo,
@@ -29,15 +29,15 @@ against an in-process **PGlite** instance — real PostgreSQL 18, no Docker.
 
 ## Layout
 
-| Path | What |
-|---|---|
-| `apps/web` | Next.js app + the single API used by both clients |
-| `apps/mobile` | Expo / iOS |
-| `packages/core` | Domain types, zod schemas, API client, analytics catalogue |
-| `packages/db` | Drizzle schema, migrations, repositories, PGlite harness |
+| Path                | What                                                            |
+| ------------------- | --------------------------------------------------------------- |
+| `apps/web`          | Next.js app + the single API used by both clients               |
+| `apps/mobile`       | Expo / iOS                                                      |
+| `packages/core`     | Domain types, zod schemas, API client, analytics catalogue      |
+| `packages/db`       | Drizzle schema, migrations, repositories, PGlite harness        |
 | `packages/pipeline` | Vision / product / affiliate / storage providers + orchestrator |
-| `packages/render` | Server-side share-card renderer (satori + resvg) |
-| `packages/design` | Design tokens — single source of truth for both platforms |
+| `packages/render`   | Server-side share-card renderer (satori + resvg)                |
+| `packages/design`   | Design tokens — single source of truth for both platforms       |
 
 ## Docs
 
