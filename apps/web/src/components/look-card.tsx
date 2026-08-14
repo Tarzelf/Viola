@@ -135,14 +135,24 @@ function ItemAnnotation({
       />
 
       <div
-        className="absolute flex flex-col items-center"
-        style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, ...style }}
+        className="absolute flex flex-col items-center overflow-hidden"
+        style={{
+          left: `${left}%`,
+          top: `${top}%`,
+          width: `${width}%`,
+          height: `${(slot.rect.y1 - slot.rect.y0) * 100}%`,
+          ...style,
+        }}
       >
         {item.imagePath && (
           <img
             src={mediaUrl(item.imagePath)}
             alt=""
-            className="mb-1.5 h-auto w-[74%] object-contain drop-shadow-[0_6px_18px_rgba(11,10,15,0.5)]"
+            /* Height is capped as well as width. Sizing by width alone let a
+               tall cutout push its label into the block beneath it — visible
+               in the demo recording as the price of one item nearly touching
+               the brand line of the next. */
+            className="mb-1.5 max-h-[58%] w-[70%] object-contain drop-shadow-[0_6px_18px_rgba(11,10,15,0.5)]"
             loading="lazy"
           />
         )}

@@ -31,6 +31,14 @@ const STAGE_COPY: Record<string, string> = {
 
 const MAX_EDGE = 1600;
 
+/**
+ * Reveal pacing. Deliberately generous — this is the beat the whole product
+ * hangs on, and rushing it to match a fast backend loses the moment.
+ */
+const REVEAL_INTERVAL_MS = 520;
+const SCORE_DELAY_MS = 420;
+const SCORE_HOLD_MS = 1700;
+
 export function UploadFlow() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,10 +49,55 @@ export function UploadFlow() {
   const [slug, setSlug] = useState<string | null>(null);
   const [stage, setStage] = useState<string | null>(null);
   const [found, setFound] = useState<Array<{ id: string; label: string }>>([]);
+  const [revealed, setRevealed] = useState(0);
   const [score, setScore] = useState<{ value: number; archetype: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const pendingRef = useRef<{ value: number; archetype: string } | null>(null);
+  const readySlugRef = useRef<string | null>(null);
+
   useEffect(() => () => void (pollRef.current && clearInterval(pollRef.current)), []);
+
+  /**
+   * Paces the reveal.
+   *
+   * Reviewing a recording of this flow showed every piece popping in at once:
+   * against mock providers the whole pipeline finishes in about 200ms, so the
+   * first poll already had the finished result. Correct, and completely flat.
+   *
+   * The choreography is therefore driven by the client's own clock rather than
+   * by data arrival. Items are released one at a time on a fixed interval, and
+   * the score only lands once the last one has. A fast backend should make the
+   * reveal *smooth*, not skip it — this is the one genuinely delightful moment
+   * the product has.
+   */
+  useEffect(() => {
+    if (revealed >= found.length) return;
+    const timer = setTimeout(() => setRevealed((n) => n + 1), REVEAL_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [revealed, found.length]);
+
+  // Score and navigation wait for the reveal to finish.
+  useEffect(() => {
+    if (!pendingRef.current || revealed < found.length || found.length === 0) return;
+
+    const value = pendingRef.current;
+    pendingRef.current = null;
+
+    const scoreTimer = setTimeout(() => {
+      setScore(value);
+      setPhase('done');
+    }, SCORE_DELAY_MS);
+
+    const navTimer = setTimeout(() => {
+      if (readySlugRef.current) router.push(`/l/${readySlugRef.current}`);
+    }, SCORE_DELAY_MS + SCORE_HOLD_MS);
+
+    return () => {
+      clearTimeout(scoreTimer);
+      clearTimeout(navTimer);
+    };
+  }, [revealed, found.length, router]);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -105,13 +158,13 @@ export function UploadFlow() {
         );
 
         if (data.ready) {
-          if (data.score !== null && data.archetype) {
-            setScore({ value: data.score, archetype: data.archetype });
-          }
           stopPolling();
-          setPhase('done');
-          // Let the score land before navigating; the beat is the payoff.
-          setTimeout(() => router.push(`/l/${lookSlug}`), 1500);
+          readySlugRef.current = lookSlug;
+          // Hand the score to the reveal timeline rather than showing it now.
+          // The effect above releases it once the last item has appeared.
+          if (data.score !== null && data.archetype) {
+            pendingRef.current = { value: data.score, archetype: data.archetype };
+          }
         } else if (data.failed) {
           stopPolling();
           setError("We couldn't read that one. Try a clearer photo?");
@@ -139,6 +192,9 @@ export function UploadFlow() {
     setSlug(null);
     setStage(null);
     setFound([]);
+    setRevealed(0);
+    pendingRef.current = null;
+    readySlugRef.current = null;
     setScore(null);
     setError(null);
   }
@@ -237,7 +293,11 @@ export function UploadFlow() {
                 {phase === 'preparing' ? 'Getting your photo ready' : 'Voilà, almost'}
               </p>
               <p className="mt-2 h-5 text-[13px] text-white/70">
-                {stage ? (STAGE_COPY[stage] ?? 'Working on it') : 'Getting started'}
+                {found.length > 0 && revealed < found.length
+                  ? `Found ${revealed} of ${found.length} pieces`
+                  : stage
+                    ? (STAGE_COPY[stage] ?? 'Working on it')
+                    : 'Getting started'}
               </p>
             </>
           )}
@@ -247,7 +307,7 @@ export function UploadFlow() {
       {/* Pieces appear as they resolve. This list filling in is the whole
           reason the wait feels like a reveal instead of a delay. */}
       <ul className="mt-5 flex flex-col gap-2">
-        {found.map((item, index) => (
+        {found.slice(0, revealed).map((item, index) => (
           <li
             key={item.id}
             className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-4 py-3"
