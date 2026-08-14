@@ -229,6 +229,13 @@ export const api = {
     }>('/api/vaults');
   },
 
+  createVault(name: string) {
+    return request<{ vault: { id: string; name: string; slug: string } }>('/api/vaults', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+  },
+
   save(input: { lookId?: string; lookItemId?: string }) {
     return request<{ saved: boolean; alreadyThere: boolean }>('/api/saves', {
       method: 'POST',

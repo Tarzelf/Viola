@@ -83,8 +83,6 @@ Plus in-app account deletion, which Apple requires separately.
 
 ## Known gaps
 
-- Naming a new vault is web-only for now; the app surfaces the paywall correctly
-  but defers creation.
 - Push notifications are not wired. Worth noting from a prior project: shipping
   `expo-notifications` without care caused an iPad launch crash, so it should be
   added deliberately rather than by default.

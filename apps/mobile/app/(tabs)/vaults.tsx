@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, ApiError } from '@/api';
+import { NewVaultSheet } from '@/components/new-vault-sheet';
 import { theme, typeStyle } from '@/theme';
 
 type Vaults = Awaited<ReturnType<typeof api.vaults>>;
@@ -21,19 +22,33 @@ export default function VaultsScreen() {
   const insets = useSafeAreaInsets();
   const [data, setData] = useState<Vaults | null>(null);
   const [signedOut, setSignedOut] = useState(false);
+  const [naming, setNaming] = useState(false);
+
+  const refresh = useCallback(async () => {
+    try {
+      setData(await api.vaults());
+      setSignedOut(false);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) setSignedOut(true);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      void (async () => {
-        try {
-          setData(await api.vaults());
-          setSignedOut(false);
-        } catch (error) {
-          if (error instanceof ApiError && error.status === 401) setSignedOut(true);
-        }
-      })();
-    }, []),
+      void refresh();
+    }, [refresh]),
   );
+
+  const showPaywall = useCallback(() => {
+    Alert.alert(
+      'Room for more',
+      'Saved is your free vault. Viola Plus lets you make as many as you like — by season, by mood, by whatever.',
+      [
+        { text: 'Not now', style: 'cancel' },
+        { text: 'See Viola Plus', onPress: () => router.push('/plus') },
+      ],
+    );
+  }, [router]);
 
   if (signedOut) {
     return (
@@ -95,18 +110,7 @@ export default function VaultsScreen() {
       </Text>
 
       <Pressable
-        onPress={() =>
-          atLimit
-            ? Alert.alert(
-                'Room for more',
-                'Saved is your free vault. Viola Plus lets you make as many as you like — by season, by mood, by whatever.',
-                [
-                  { text: 'Not now', style: 'cancel' },
-                  { text: 'See Viola Plus', onPress: () => router.push('/plus') },
-                ],
-              )
-            : Alert.alert('New vault', 'Naming a vault is coming to the app shortly.')
-        }
+        onPress={() => (atLimit ? showPaywall() : setNaming(true))}
         style={{
           alignSelf: 'flex-start',
           marginTop: 16,
@@ -179,6 +183,12 @@ export default function VaultsScreen() {
           </Text>
         </Pressable>
       )}
+      <NewVaultSheet
+        visible={naming}
+        onClose={() => setNaming(false)}
+        onCreated={refresh}
+        onPaywall={showPaywall}
+      />
     </ScrollView>
   );
 }
