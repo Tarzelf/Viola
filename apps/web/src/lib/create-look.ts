@@ -11,6 +11,7 @@ import {
 import { getArchetype } from '@viola/core';
 import { renderAllCards } from '@viola/render';
 import { providers } from './providers';
+import { track } from './analytics';
 
 /**
  * Creating a look.
@@ -157,7 +158,14 @@ export async function processLook(
       // still produces a card with real cutouts instead of silently degrading
       // to labels only.
       fetchImpl: p.products.name === 'mock' ? createFixtureFetch() : fetch,
-      onStage: async (stage) => {
+      onStage: async (stage, { ok, ms }) => {
+        track('look_pipeline_stage_completed', {
+          surface: 'web',
+          lookId,
+          stage,
+          ms,
+          ok,
+        });
         await database
           .update(schema.looks)
           .set({ failureReason: `stage:${stage}` })
@@ -166,6 +174,11 @@ export async function processLook(
     });
 
     if (result.quarantined) {
+      track('upload_quarantined', {
+        surface: 'web',
+        lookId,
+        reasons: result.quarantineReasons,
+      });
       // App Store guideline 1.2: flagged content is never publicly reachable.
       await database
         .update(schema.looks)
@@ -226,6 +239,15 @@ export async function processLook(
         publishedAt: new Date(),
       })
       .where(eq(schema.looks.id, lookId));
+
+    track('look_published', {
+      surface: 'web',
+      lookId,
+      itemCount: result.items.length,
+      score: result.score.overall,
+      archetype: result.archetypeId,
+      visibility: 'public',
+    });
 
     // Share cards last: the look is already usable without them, and a render
     // failure must not block publication.

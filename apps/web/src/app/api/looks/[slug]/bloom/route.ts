@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { schema } from '@viola/db';
 import { db } from '@/lib/db';
 import { attachGuestCookie, getViewer } from '@/lib/identity';
+import { track } from '@/lib/analytics';
 
 export const runtime = 'nodejs';
 
@@ -55,6 +56,26 @@ export async function POST(_request: Request, context: { params: Promise<{ slug:
       .update(schema.profiles)
       .set({ totalBloomsReceived: sql`${schema.profiles.totalBloomsReceived} + 1` })
       .where(eq(schema.profiles.userId, look.userId));
+  }
+
+  if (inserted.length > 0) {
+    track('bloom_given', {
+      surface: 'web',
+      lookId: slug,
+      isGuest: !viewer.isAuthenticated,
+      ...(viewer.userId ? { userId: viewer.userId } : { guestId: viewer.guestId }),
+    });
+
+    // A guest reacting to a shared look is step five of the funnel — the
+    // moment a recipient stops being a passive viewer.
+    if (!viewer.isAuthenticated) {
+      track('guest_activated', {
+        surface: 'web',
+        lookId: slug,
+        action: 'bloom',
+        guestId: viewer.guestId,
+      });
+    }
   }
 
   const [current] = await database

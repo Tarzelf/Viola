@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { emit } from '@/lib/client-analytics';
 
 /**
  * Upload and the Voilà.
@@ -87,6 +88,11 @@ export function UploadFlow() {
     const scoreTimer = setTimeout(() => {
       setScore(value);
       setPhase('done');
+      emit('look_reveal_played', {
+        lookId: readySlugRef.current,
+        itemCount: found.length,
+        ms: found.length * REVEAL_INTERVAL_MS,
+      });
     }, SCORE_DELAY_MS);
 
     const navTimer = setTimeout(() => {

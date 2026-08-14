@@ -1,26 +1,33 @@
 import { NextResponse } from 'next/server';
+import { SHARE_CHANNELS, type ShareChannel } from '@viola/core';
 import { attachGuestCookie, getViewer } from '@/lib/identity';
+import { track } from '@/lib/analytics';
 
 export const runtime = 'nodejs';
 
 /**
- * Records that a share was sent.
+ * Records that a share left the device.
  *
- * `share_sent` is the step in the viral funnel where most loops quietly die —
- * plenty of people open a share sheet and never complete it — so it is
- * instrumented separately from `share_opened` rather than inferred.
- *
- * Currently writes to the log; wired to PostHog in the analytics phase. Never
- * blocks the share itself.
+ * `share_sent` is instrumented separately from `share_opened` rather than
+ * inferred from it, because the gap between the two is where most viral loops
+ * quietly die — plenty of people open a share sheet and never complete it. If
+ * you only measure one of them you cannot tell a bad CTA from a bad sheet.
  */
 export async function POST(request: Request, context: { params: Promise<{ slug: string }> }) {
   const { slug } = await context.params;
   const viewer = await getViewer();
   const body = (await request.json().catch(() => ({}))) as { channel?: string };
 
-  console.info(
-    `[viola] share_sent slug=${slug} channel=${body.channel ?? 'unknown'} guest=${!viewer.isAuthenticated}`,
-  );
+  const channel = (SHARE_CHANNELS as readonly string[]).includes(body.channel ?? '')
+    ? (body.channel as ShareChannel)
+    : 'system_sheet';
+
+  track('share_sent', {
+    surface: 'web',
+    lookId: slug,
+    channel,
+    ...(viewer.userId ? { userId: viewer.userId } : { guestId: viewer.guestId }),
+  });
 
   return attachGuestCookie(NextResponse.json({ ok: true }), viewer);
 }

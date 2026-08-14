@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { emit } from '@/lib/client-analytics';
 
 /**
  * The share row.
@@ -39,7 +40,18 @@ export function ShareRow({ slug, url, handle, archetype, score }: ShareRowProps)
       ? `rate my fit 👀 ${archetype} ${score} — ${absolute}`
       : `rate my fit 👀 ${absolute}`;
 
+  // Step one: the user is now looking at something worth sharing. Emitted on
+  // mount because reaching this component IS reaching the trigger.
+  useEffect(() => {
+    emit('share_trigger_reached', { lookId: slug });
+  }, [slug]);
+
   function track(channel: string) {
+    // Two distinct steps: they engaged a share affordance, and a share left
+    // the device. Measuring only the second cannot tell a bad CTA from a bad
+    // sheet.
+    emit('share_opened', { lookId: slug, entry: 'look_page' });
+
     // Fire and forget: never make the user wait on analytics to share.
     void fetch(`/api/looks/${slug}/share`, {
       method: 'POST',

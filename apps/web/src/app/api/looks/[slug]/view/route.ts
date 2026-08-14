@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { schema } from '@viola/db';
 import { db } from '@/lib/db';
 import { attachGuestCookie, getViewer, viewerHash } from '@/lib/identity';
+import { track } from '@/lib/analytics';
 
 export const runtime = 'nodejs';
 
@@ -76,6 +77,27 @@ export async function POST(request: Request, context: { params: Promise<{ slug: 
     .update(schema.looks)
     .set({ viewCount: sql`${schema.looks.viewCount} + 1` })
     .where(eq(schema.looks.id, look.id));
+
+  const identity = viewer.userId ? { userId: viewer.userId } : { guestId: viewer.guestId };
+
+  track('look_viewed', {
+    surface: 'web',
+    lookId: slug,
+    isOwner: false,
+    source: body.source ?? 'feed',
+    ...identity,
+  });
+
+  // Step four: a recipient actually opened the link someone sent them.
+  if (body.source === 'share_link') {
+    track('share_link_opened', {
+      surface: 'web',
+      lookId: slug,
+      hasAccount: viewer.isAuthenticated,
+      ...(body.referrerHandle ? { referrerHandle: body.referrerHandle } : {}),
+      ...identity,
+    });
+  }
 
   return attachGuestCookie(NextResponse.json({ counted: true }), viewer);
 }

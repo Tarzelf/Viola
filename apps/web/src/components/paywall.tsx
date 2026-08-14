@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { emit } from '@/lib/client-analytics';
 import Link from 'next/link';
 
 /**
@@ -33,6 +34,7 @@ const BENEFITS = [
 export function Paywall({ open, onClose, title, body }: PaywallProps) {
   useEffect(() => {
     if (!open) return;
+    emit('paywall_shown', { trigger: title });
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -40,7 +42,7 @@ export function Paywall({ open, onClose, title, body }: PaywallProps) {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [open, onClose]);
+  }, [open, onClose, title]);
 
   if (!open) return null;
 

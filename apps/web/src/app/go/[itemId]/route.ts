@@ -5,6 +5,7 @@ import { schema } from '@viola/db';
 import { db } from '@/lib/db';
 import { getViewer } from '@/lib/identity';
 import { providers } from '@/lib/providers';
+import { track } from '@/lib/analytics';
 
 export const runtime = 'nodejs';
 
@@ -82,6 +83,14 @@ export async function GET(request: Request, context: { params: Promise<{ itemId:
   } catch {
     // Analytics must never block commerce.
   }
+
+  track('shop_tapped', {
+    surface: 'web',
+    lookId: row.lookId ?? '',
+    lookItemId: row.itemId,
+    affiliateProvider: affiliate.name,
+    ...(viewer.userId ? { userId: viewer.userId } : { guestId: viewer.guestId }),
+  });
 
   return NextResponse.redirect(targetUrl, { status: 302 });
 }
