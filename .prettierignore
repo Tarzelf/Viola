@@ -1,0 +1,15 @@
+node_modules
+dist
+build
+.next
+.turbo
+coverage
+pnpm-lock.yaml
+*.snap
+packages/db/src/migrations/**
+# Generated from packages/design/src/tokens.ts — prettier would lowercase the
+# hex values and break the token/CSS parity test.
+packages/design/src/theme.css
+packages/render/assets/fonts/**
+**/__snapshots__/**
+**/fixtures/**/*.json

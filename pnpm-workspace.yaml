@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# sharp and @resvg/resvg-js ship native binaries; onnxruntime is an optional
+# precision upgrade for subject masking (see PLAN §4.2).
+onlyBuiltDependencies:
+  - '@resvg/resvg-js'
+  - sharp
+  - esbuild
