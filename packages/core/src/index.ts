@@ -5,3 +5,4 @@ export * from './slug.js';
 export * from './analytics.js';
 export * from './errors.js';
 export * from './plans.js';
+export * from './labels.js';
