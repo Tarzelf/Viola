@@ -81,6 +81,19 @@ The App Store requires four things of a UGC app, and all four exist on iOS:
 
 Plus in-app account deletion, which Apple requires separately.
 
+## Verify on a simulator before shipping
+
+`expo prebuild` succeeds and the generated project is correct in the ways I
+could check from Linux: bundle id, `applinks:viola.app` in the entitlements,
+deployment target 16.4, and a `SplashScreenBackground` colorset holding exactly
+`#0B0A0F`.
+
+One thing I could **not** verify without booting a simulator: the generated
+`SplashScreen.storyboard` still sets its container view to
+`systemBackgroundColor`, which is white. The colorset is right, so this may be
+resolved at runtime, but if you see a white flash on cold launch that is where
+to look. It matters more than it sounds for an app this dark.
+
 ## Known gaps
 
 - Push notifications are not wired. Worth noting from a prior project: shipping

@@ -8,12 +8,6 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "backgroundColor": "#0B0A0F",
-
-    "splash": {
-      "backgroundColor": "#0B0A0F",
-      "resizeMode": "contain"
-    },
-
     "ios": {
       "bundleIdentifier": "app.viola.ios",
       "buildNumber": "1",
@@ -26,9 +20,15 @@
         "UIViewControllerBasedStatusBarAppearance": false
       }
     },
-
     "plugins": [
       "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B0A0F",
+          "resizeMode": "contain"
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -39,15 +39,15 @@
       [
         "expo-build-properties",
         {
-          "ios": { "deploymentTarget": "16.4" }
+          "ios": {
+            "deploymentTarget": "16.4"
+          }
         }
       ]
     ],
-
     "experiments": {
       "typedRoutes": true
     },
-
     "extra": {
       "router": {},
       "eas": {
