@@ -275,3 +275,48 @@ export async function getProfileForUser(userId: string) {
     .limit(1);
   return row ?? null;
 }
+
+export interface SponsoredPlacementView {
+  id: string;
+  brandName: string;
+  headline: string;
+  body: string | null;
+  imagePath: string;
+  ctaLabel: string;
+  targetUrl: string;
+  frequency: number;
+}
+
+/**
+ * Active sponsored placements.
+ *
+ * Returns nothing for Plus subscribers, so the caller never has to remember to
+ * check — the entitlement is enforced at the source rather than at each render
+ * site, which is the difference between "usually ad-free" and "ad-free".
+ */
+export async function getSponsoredPlacements(
+  showsSponsored: boolean,
+): Promise<SponsoredPlacementView[]> {
+  if (!showsSponsored) return [];
+
+  const database = await db();
+  const now = new Date();
+
+  const rows = await database
+    .select()
+    .from(schema.sponsoredPlacements)
+    .where(eq(schema.sponsoredPlacements.isActive, true));
+
+  return rows
+    .filter((r) => (!r.startsAt || r.startsAt <= now) && (!r.endsAt || r.endsAt >= now))
+    .map((r) => ({
+      id: r.id,
+      brandName: r.brandName,
+      headline: r.headline,
+      body: r.body,
+      imagePath: r.imagePath,
+      ctaLabel: r.ctaLabel,
+      targetUrl: r.targetUrl,
+      frequency: r.frequency,
+    }));
+}

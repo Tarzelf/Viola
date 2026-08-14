@@ -1,5 +1,9 @@
+import { Fragment } from 'react';
 import Link from 'next/link';
-import { getFeed, type FeedTab } from '@/lib/queries';
+import { getFeed, getSponsoredPlacements, type FeedTab } from '@/lib/queries';
+import { db } from '@/lib/db';
+import { showsSponsored } from '@/lib/entitlements';
+import { SponsoredCard } from '@/components/sponsored-card';
 import { getViewer } from '@/lib/identity';
 import { FeedCard } from '@/components/look-card';
 import { AppShell } from '@/components/app-shell';
@@ -26,6 +30,11 @@ export default async function FeedPage({
     viewerUserId: viewer.userId,
     viewerGuestId: viewer.guestId,
   });
+
+  // Free accounts and signed-out visitors see sponsored placements; Plus does
+  // not. The entitlement is applied at the query, not at the render site.
+  const placements = await getSponsoredPlacements(await showsSponsored(await db(), viewer.userId));
+  const every = placements[0]?.frequency ?? 7;
 
   return (
     <AppShell>
@@ -57,9 +66,20 @@ export default async function FeedPage({
         <EmptyFeed />
       ) : (
         <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-          {looks.map((look) => (
-            <FeedCard key={look.id} look={look} />
-          ))}
+          {looks.map((look, index) => {
+            // Slot a sponsored card in after every Nth organic look rather
+            // than reserving a fixed position, so the feed keeps its rhythm.
+            const slotIndex = Math.floor(index / every) - 1;
+            const showAd = placements.length > 0 && index > 0 && index % every === 0;
+            const placement = showAd ? placements[slotIndex % placements.length] : null;
+
+            return (
+              <Fragment key={look.id}>
+                {placement && <SponsoredCard placement={placement} />}
+                <FeedCard look={look} />
+              </Fragment>
+            );
+          })}
         </div>
       )}
     </AppShell>
