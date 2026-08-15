@@ -37,7 +37,11 @@ export function VaultLookbook({
   vaultName: string;
   items: VaultGalleryItem[];
 }) {
-  const [active, setActive] = useState(0);
+  const initial = Math.max(
+    0,
+    items.findIndex((item) => Boolean(item.imagePath || item.photoPath)),
+  );
+  const [active, setActive] = useState(initial === -1 ? 0 : initial);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const current = items[active] ?? items[0];
 
@@ -62,8 +66,10 @@ export function VaultLookbook({
 
   return (
     <div>
-      <div className="grid gap-6 lg:grid-cols-[72px_minmax(0,1fr)]">
-        <div className="no-scrollbar hidden max-h-[70vh] flex-col gap-2 overflow-y-auto lg:flex">
+      {/* On large screens the thumb rail sits beside the stage; on small it
+          becomes a horizontal strip under the stage so the title stays clean. */}
+      <div className="grid gap-6 lg:grid-cols-[72px_minmax(0,1fr)] lg:items-start">
+        <div className="no-scrollbar hidden max-h-[min(70vh,640px)] flex-col gap-2 overflow-y-auto lg:flex">
           {items.map((item, i) => (
             <button
               key={item.id}
@@ -90,16 +96,18 @@ export function VaultLookbook({
               onClick={() => {
                 if (lookEntries.length > 0) setGalleryOpen(true);
               }}
-              className="relative flex aspect-square w-full items-center justify-center bg-white/[0.03] sm:aspect-[5/4]"
+              className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-[rgba(255,255,255,0.03)] sm:aspect-[5/4]"
               aria-label={
                 lookEntries.length > 0 ? 'Open lookbook gallery' : (current.title ?? vaultName)
               }
             >
+              {/* Prefer the product cutout; fall back to the look photo so a
+                  look-only save never lands as an empty slab. */}
               {current.imagePath ? (
                 <img
                   src={mediaUrl(current.imagePath)}
                   alt=""
-                  className="h-[72%] w-[72%] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
+                  className="relative z-[1] h-[72%] w-[72%] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
                 />
               ) : current.photoPath ? (
                 <img
@@ -108,7 +116,10 @@ export function VaultLookbook({
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
-                <div className="h-3 w-3 rounded-full bg-white/15" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-white/15" />
+                  <span className="text-[12px] text-[var(--color-text-tertiary)]">No image yet</span>
+                </div>
               )}
             </button>
 
