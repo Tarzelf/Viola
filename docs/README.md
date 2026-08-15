@@ -1,5 +1,6 @@
 # Docs
 
+- **[BILLING.md](./BILLING.md)** — Whop (web) + Superwall (iOS) setup.
 - **[LAUNCH.md](./LAUNCH.md)** — soft-launch → TestFlight → App Store order of operations.
 - **[APPSTORE.md](./APPSTORE.md)** — review answers, privacy labels, listing copy, EAS submit.
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — how it fits together, the pipeline,

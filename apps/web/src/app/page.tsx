@@ -7,6 +7,7 @@ import { SponsoredCard } from '@/components/sponsored-card';
 import { getViewer } from '@/lib/identity';
 import { FeedCard } from '@/components/look-card';
 import { LookSlider } from '@/components/look-slider';
+import { LanderHero } from '@/components/lander-hero';
 import { AppShell } from '@/components/app-shell';
 
 export const dynamic = 'force-dynamic';
@@ -20,11 +21,26 @@ const TABS: Array<{ id: FeedTab; label: string }> = [
 export default async function FeedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; feed?: string }>;
 }) {
   const params = await searchParams;
   const tab = (TABS.find((t) => t.id === params.tab)?.id ?? 'for-you') as FeedTab;
   const viewer = await getViewer();
+
+  // Guests land on the brand hero above the fold — the conversion surface —
+  // unless they explicitly asked for the feed (?feed=1 from the secondary CTA).
+  if (!viewer.isAuthenticated && params.feed !== '1' && !params.tab) {
+    return (
+      <main>
+        <LanderHero
+          primaryHref="/new"
+          primaryLabel="Post your first fit"
+          secondaryHref="/?feed=1"
+          secondaryLabel="See the feed"
+        />
+      </main>
+    );
+  }
 
   const [looks, featured] = await Promise.all([
     getFeed({
@@ -32,8 +48,6 @@ export default async function FeedPage({
       viewerUserId: viewer.userId,
       viewerGuestId: viewer.guestId,
     }),
-    // Featured runway only on For you — Top of the week already IS that list,
-    // and Fresh should feel chronological, not curated.
     tab === 'for-you'
       ? getFeed({
           tab: 'top',
@@ -44,8 +58,6 @@ export default async function FeedPage({
       : Promise.resolve([]),
   ]);
 
-  // Free accounts and signed-out visitors see sponsored placements; Plus does
-  // not. The entitlement is applied at the query, not at the render site.
   const placements = await getSponsoredPlacements(await showsSponsored(await db(), viewer.userId));
   const every = placements[0]?.frequency ?? 7;
 

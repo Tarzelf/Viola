@@ -78,10 +78,10 @@ export function formatPrice(cents: number, currency = 'USD'): string {
 
 /**
  * Where a subscription came from. Apple requires in-app digital features to be
- * sold through StoreKit, so iOS purchases are IAP and web purchases are Stripe;
- * both resolve to the same entitlement.
+ * sold through StoreKit (Superwall), so iOS purchases are IAP; web purchases
+ * go through Whop. Both resolve to the same entitlement.
  */
-export type SubscriptionPlatform = 'stripe' | 'apple';
+export type SubscriptionPlatform = 'stripe' | 'apple' | 'whop';
 
 export interface SubscriptionState {
   tier: Tier;

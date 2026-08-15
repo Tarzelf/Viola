@@ -1,21 +1,16 @@
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { usePlacement } from 'expo-superwall';
 import { PRICES, formatPrice } from '@viola/core';
 import { theme, typeStyle } from '@/theme';
 
+const HAS_SUPERWALL = Boolean(process.env.EXPO_PUBLIC_SUPERWALL_API_KEY);
+
 /**
- * Viola Plus, on iOS.
- *
- * IMPORTANT: this must complete through StoreKit, not a web checkout. Apple
- * requires in-app purchase for digital features consumed inside the app
- * (guideline 3.1.1), and linking out to Stripe here would be rejected.
- * react-native-purchases is in the dependency list for exactly this, and needs
- * a RevenueCat key plus App Store Connect products before it can be wired —
- * neither of which can be created from this machine.
- *
- * Affiliate shop links are a completely different case and stay as they are:
- * physical goods consumed outside the app must NOT use IAP (3.1.3(e)).
+ * Viola Plus on iOS — StoreKit via Superwall.
+ * Web checkout (Whop) must never be linked from here (Guideline 3.1.1).
  */
 export default function PlusScreen() {
   const router = useRouter();
@@ -97,23 +92,34 @@ export default function PlusScreen() {
         />
       </View>
 
-      <Pressable
-        onPress={() =>
-          Alert.alert(
-            'In-app purchase',
-            'Viola Plus must be bought through the App Store on iOS. Connect a RevenueCat key and App Store Connect products to enable this.',
-          )
-        }
-        style={{
-          marginTop: 20,
-          paddingVertical: 16,
-          borderRadius: theme.radius.pill,
-          backgroundColor: theme.color.viola,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ ...typeStyle('titleSm'), color: '#fff' }}>Get Viola Plus</Text>
-      </Pressable>
+      {HAS_SUPERWALL && Platform.OS === 'ios' ? (
+        <SuperwallPurchaseButton onDone={() => router.back()} />
+      ) : (
+        <Pressable
+          onPress={() => {
+            if (Platform.OS !== 'ios') {
+              Alert.alert(
+                'Get Plus on the web',
+                'On web, Viola Plus is sold through Whop at viola.app/plus.',
+              );
+              return;
+            }
+            Alert.alert(
+              'Superwall not configured',
+              'Set EXPO_PUBLIC_SUPERWALL_API_KEY and a campaign with placement "campaign_trigger".',
+            );
+          }}
+          style={{
+            marginTop: 20,
+            paddingVertical: 16,
+            borderRadius: theme.radius.pill,
+            backgroundColor: theme.color.viola,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ ...typeStyle('titleSm'), color: '#fff' }}>Get Viola Plus</Text>
+        </Pressable>
+      )}
 
       <Text
         style={{
@@ -123,10 +129,53 @@ export default function PlusScreen() {
           marginTop: 16,
         }}
       >
-        Cancel any time. Buying something you found through Viola never costs extra — retailers pay
-        us, not you.
+        Billed through the App Store. Cancel anytime. Retailers — not you — fund shop commissions.
       </Text>
     </ScrollView>
+  );
+}
+
+function SuperwallPurchaseButton({ onDone }: { onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const { registerPlacement } = usePlacement({
+    onDismiss: (_info, result) => {
+      setBusy(false);
+      if (result.type === 'purchased' || result.type === 'restored') {
+        Alert.alert("You're on Viola Plus", "Everything's unlocked.");
+        onDone();
+      }
+    },
+    onError: (error) => {
+      setBusy(false);
+      Alert.alert('Purchase unavailable', error);
+    },
+  });
+
+  return (
+    <Pressable
+      disabled={busy}
+      onPress={async () => {
+        setBusy(true);
+        try {
+          await registerPlacement({ placement: 'campaign_trigger' });
+        } catch (e) {
+          setBusy(false);
+          Alert.alert('Could not open paywall', e instanceof Error ? e.message : 'Unknown error');
+        }
+      }}
+      style={{
+        marginTop: 20,
+        paddingVertical: 16,
+        borderRadius: theme.radius.pill,
+        backgroundColor: theme.color.viola,
+        alignItems: 'center',
+        opacity: busy ? 0.6 : 1,
+      }}
+    >
+      <Text style={{ ...typeStyle('titleSm'), color: '#fff' }}>
+        {busy ? 'Opening…' : 'Get Viola Plus'}
+      </Text>
+    </Pressable>
   );
 }
 

@@ -72,7 +72,7 @@ export default function PrivacyPage() {
               <li>Infrastructure providers that host the app and store media.</li>
               <li>Vision and product-search providers that process look photos to identify items.</li>
               <li>Affiliate networks when you tap Shop (commission attribution).</li>
-              <li>Apple / Stripe for Viola Plus billing.</li>
+              <li>Apple (StoreKit / Superwall) and Whop for Viola Plus billing.</li>
               <li>Law enforcement when legally required.</li>
             </ul>
           </Section>

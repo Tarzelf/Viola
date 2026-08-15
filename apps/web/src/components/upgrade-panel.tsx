@@ -6,20 +6,20 @@ import { useRouter } from 'next/navigation';
 /**
  * Plan selection and checkout.
  *
- * When Stripe is not configured this offers a clearly-labelled development
- * upgrade instead, so the paid tier can be exercised on a fresh clone. That
- * path is refused by the server in production and whenever real keys exist.
+ * Web billing is Whop. When no WHOP_API_KEY is set, checkout still opens the
+ * public Whop plan URL. A clearly-labelled development unlock remains for
+ * offline local testing.
  */
 export function UpgradePanel({
   tier,
-  stripeReady,
+  billingReady,
   monthlyLabel,
   annualLabel,
   annualPerMonth,
   savings,
 }: {
   tier: 'free' | 'plus';
-  stripeReady: boolean;
+  billingReady: boolean;
   monthlyLabel: string;
   annualLabel: string;
   annualPerMonth: string;
@@ -35,7 +35,7 @@ export function UpgradePanel({
     setError(null);
 
     try {
-      if (stripeReady) {
+      if (billingReady) {
         const response = await fetch('/api/billing/checkout', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -74,7 +74,7 @@ export function UpgradePanel({
         <div className="rounded-[var(--radius-xl)] border border-[rgba(124,92,252,0.3)] bg-[var(--color-viola-soft)] px-5 py-4 text-center">
           <p className="text-[15px] font-semibold text-white">You&rsquo;re on Viola Plus</p>
         </div>
-        {!stripeReady && (
+        {!billingReady && (
           <button
             type="button"
             onClick={cancel}
@@ -114,14 +114,12 @@ export function UpgradePanel({
         disabled={busy}
         className="mt-4 w-full rounded-full bg-[var(--color-viola)] px-5 py-3.5 text-[15px] font-semibold text-white transition-transform active:scale-[0.98] disabled:opacity-45"
       >
-        {busy ? 'One moment…' : stripeReady ? 'Get Viola Plus' : 'Unlock Plus (development)'}
+        {busy ? 'One moment…' : 'Get Viola Plus'}
       </button>
 
-      {!stripeReady && (
-        <p className="mt-2.5 text-center text-[12px] text-[var(--color-warning)]">
-          No Stripe keys configured — this grants Plus locally so the tier is testable.
-        </p>
-      )}
+      <p className="mt-2.5 text-center text-[12px] text-[var(--color-text-tertiary)]">
+        Secure checkout powered by Whop.
+      </p>
 
       {error && <p className="mt-3 text-center text-[13px] text-[var(--color-danger)]">{error}</p>}
     </div>

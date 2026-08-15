@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   if (!viewer.userId)
     return NextResponse.json({ error: { code: 'unauthorized' } }, { status: 401 });
 
-  if (isStripeConfigured() || process.env.NODE_ENV === 'production') {
+  if (process.env.WHOP_API_KEY || isStripeConfigured() || process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: { code: 'forbidden' } }, { status: 403 });
   }
 

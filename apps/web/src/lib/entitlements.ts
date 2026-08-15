@@ -33,7 +33,7 @@ export async function getTier(db: Database, userId: string): Promise<Tier> {
 
   return resolveTier({
     tier: subscription.tier as Tier,
-    platform: subscription.platform as 'stripe' | 'apple',
+    platform: subscription.platform as 'stripe' | 'apple' | 'whop',
     currentPeriodEnd: subscription.currentPeriodEnd,
     cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
   });

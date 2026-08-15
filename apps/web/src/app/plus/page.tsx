@@ -5,7 +5,7 @@ import { UpgradePanel } from '@/components/upgrade-panel';
 import { getViewer } from '@/lib/identity';
 import { db } from '@/lib/db';
 import { getEntitlements } from '@/lib/entitlements';
-import { isStripeConfigured } from '@/lib/billing';
+import { isLiveWebBilling } from '@/lib/billing';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Viola Plus' };
@@ -74,7 +74,7 @@ export default async function PlusPage({
 
         <UpgradePanel
           tier={entitlements.tier}
-          stripeReady={isStripeConfigured()}
+          billingReady={isLiveWebBilling()}
           monthlyLabel={`${formatPrice(monthly.cents)}/month`}
           annualLabel={`${formatPrice(annual.cents)}/year`}
           annualPerMonth={`${formatPrice(annual.perMonthCents)}/mo`}

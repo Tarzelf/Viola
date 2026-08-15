@@ -2,27 +2,26 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
+import { SuperwallProvider } from 'expo-superwall';
 import { FONTS, theme } from '@/theme';
 
 /**
  * Root layout.
  *
- * Fonts are bundled rather than fetched. The share cards this app produces are
- * rendered server-side with the same faces, and a card whose type does not
- * match the app it came from is a small inconsistency that reads as
- * carelessness.
+ * Superwall wraps the tree on iOS so Plus purchases go through StoreKit.
+ * Web/Android still boot without a key — the provider no-ops when keys are empty.
  */
+const SUPERWALL_IOS = process.env.EXPO_PUBLIC_SUPERWALL_API_KEY ?? '';
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts(FONTS);
 
   if (!fontsLoaded) {
-    // A blank canvas in the brand colour rather than a spinner — the app should
-    // never flash unstyled text.
     return <View style={{ flex: 1, backgroundColor: theme.color.ink }} />;
   }
 
-  return (
+  const tree = (
     <SafeAreaProvider>
       <StatusBar style="light" />
       <Stack
@@ -39,7 +38,19 @@ export default function RootLayout() {
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
         />
         <Stack.Screen name="signin" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="plus" options={{ presentation: 'modal' }} />
       </Stack>
     </SafeAreaProvider>
+  );
+
+  // Superwall requires a native build; skip wrapping when no key (Expo web / CI).
+  if (!SUPERWALL_IOS || Platform.OS === 'web') {
+    return tree;
+  }
+
+  return (
+    <SuperwallProvider apiKeys={{ ios: SUPERWALL_IOS }}>
+      {tree}
+    </SuperwallProvider>
   );
 }

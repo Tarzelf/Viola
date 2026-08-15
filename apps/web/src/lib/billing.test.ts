@@ -142,15 +142,13 @@ describe('development upgrade', () => {
     expect(await getTier(db(), userId)).toBe('plus');
   });
 
-  it('refuses once Stripe is configured', async () => {
-    // A dev backdoor that survives into production is a catastrophe, so it is
-    // guarded at the service as well as at the route.
+  it('refuses once live billing credentials are present', async () => {
     const userId = await makeUser();
-    process.env.STRIPE_SECRET_KEY = 'sk_live_pretend';
+    process.env.WHOP_API_KEY = 'whop_live_pretend';
     try {
       await expect(grantDevelopmentPlus(db(), userId)).rejects.toThrow();
     } finally {
-      delete process.env.STRIPE_SECRET_KEY;
+      delete process.env.WHOP_API_KEY;
     }
   });
 });

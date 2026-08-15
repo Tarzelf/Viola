@@ -6,25 +6,30 @@ import { schema, type Database } from '@viola/db';
 /**
  * Billing.
  *
- * Web purchases go through Stripe. iOS purchases must go through StoreKit —
- * Apple requires in-app purchase for digital features consumed in the app, and
- * Viola Plus plainly is one. Both write to the same subscriptions table and
- * resolve through the same entitlement code, so the rest of the product never
- * has to care which platform paid.
+ * Web purchases go through Whop. iOS purchases must go through StoreKit via
+ * Superwall — Apple requires IAP for digital features consumed in the app.
+ * Both write to the same subscriptions table and resolve through the same
+ * entitlement code.
  *
- * Affiliate commerce is unaffected by any of this: physical goods consumed
- * outside the app must NOT use IAP (guideline 3.1.3(e)), so outbound shop links
- * stay exactly as they are.
- *
- * Stripe is reached over plain fetch rather than the SDK. The two calls we need
- * are simple form posts, and it keeps a heavyweight dependency out of the
- * serverless bundle.
+ * Affiliate commerce is unaffected: physical goods consumed outside the app
+ * must NOT use IAP (guideline 3.1.3(e)).
  */
 
 const STRIPE_API = 'https://api.stripe.com/v1';
+const WHOP_PLAN_MONTHLY = process.env.WHOP_PLAN_MONTHLY ?? 'plan_N10txmmhZciIL';
+const WHOP_PLAN_ANNUAL = process.env.WHOP_PLAN_ANNUAL ?? 'plan_xtUcJ3EzAQ3MY';
 
+export function isWhopConfigured(): boolean {
+  return Boolean(WHOP_PLAN_MONTHLY && WHOP_PLAN_ANNUAL);
+}
+
+/** Prefer Whop for "live" web billing; Stripe only if explicitly forced. */
 export function isStripeConfigured(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY);
+  return process.env.VIOLA_WEB_BILLING === 'stripe' && Boolean(process.env.STRIPE_SECRET_KEY);
+}
+
+export function isLiveWebBilling(): boolean {
+  return isWhopConfigured() || isStripeConfigured();
 }
 
 export type PlanId = 'monthly' | 'annual';
@@ -52,40 +57,90 @@ async function stripe(path: string, body: Record<string, string>): Promise<unkno
   return response.json();
 }
 
+export async function createWhopCheckout(input: {
+  userId: string;
+  email: string;
+  plan: PlanId;
+  origin: string;
+}): Promise<{ url: string }> {
+  const planId = input.plan === 'annual' ? WHOP_PLAN_ANNUAL : WHOP_PLAN_MONTHLY;
+  const apiKey = process.env.WHOP_API_KEY;
+
+  if (apiKey) {
+    try {
+      const response = await fetch('https://api.whop.com/api/v1/checkout_configurations', {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${apiKey}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan_id: planId,
+          redirect_url: `${input.origin}/plus?welcome=1`,
+          metadata: {
+            userId: input.userId,
+            email: input.email,
+            plan: input.plan,
+            app: 'viola',
+          },
+        }),
+      });
+      if (response.ok) {
+        const data = (await response.json()) as { purchase_url?: string };
+        if (data.purchase_url) return { url: data.purchase_url };
+      } else {
+        console.warn('[viola] whop checkout_configurations', await response.text());
+      }
+    } catch (err) {
+      console.warn('[viola] whop checkout error', err);
+    }
+  }
+
+  const params = new URLSearchParams({
+    redirect: `${input.origin}/plus?welcome=1`,
+  });
+  // Metadata query params help attribute when API key isn't set.
+  params.set('metadata[userId]', input.userId);
+  params.set('metadata[plan]', input.plan);
+  return { url: `https://whop.com/checkout/${planId}?${params.toString()}` };
+}
+
 export async function createCheckoutSession(input: {
   userId: string;
   email: string;
   plan: PlanId;
   origin: string;
 }): Promise<{ url: string }> {
-  const price = priceIdFor(input.plan);
-  if (!price) {
-    throw new ViolaError('provider_failed', 'stripe price id not configured', {
-      publicMessage: 'Checkout is not set up yet.',
-    });
+  if (isStripeConfigured()) {
+    const price = priceIdFor(input.plan);
+    if (!price) {
+      throw new ViolaError('provider_failed', 'stripe price id not configured', {
+        publicMessage: 'Checkout is not set up yet.',
+      });
+    }
+
+    const session = (await stripe('/checkout/sessions', {
+      mode: 'subscription',
+      'line_items[0][price]': price,
+      'line_items[0][quantity]': '1',
+      customer_email: input.email,
+      'metadata[userId]': input.userId,
+      'subscription_data[metadata][userId]': input.userId,
+      success_url: `${input.origin}/plus?welcome=1`,
+      cancel_url: `${input.origin}/plus`,
+      allow_promotion_codes: 'true',
+    })) as { url?: string };
+
+    if (!session.url) throw new ViolaError('provider_failed', 'stripe returned no checkout url');
+    return { url: session.url };
   }
 
-  const session = (await stripe('/checkout/sessions', {
-    mode: 'subscription',
-    'line_items[0][price]': price,
-    'line_items[0][quantity]': '1',
-    customer_email: input.email,
-    // The user id rides along so the webhook can attribute the subscription
-    // without trusting anything from the browser.
-    'metadata[userId]': input.userId,
-    'subscription_data[metadata][userId]': input.userId,
-    success_url: `${input.origin}/plus?welcome=1`,
-    cancel_url: `${input.origin}/plus`,
-    allow_promotion_codes: 'true',
-  })) as { url?: string };
-
-  if (!session.url) throw new ViolaError('provider_failed', 'stripe returned no checkout url');
-  return { url: session.url };
+  return createWhopCheckout(input);
 }
 
 export interface SubscriptionUpdate {
   userId: string;
-  platform: 'stripe' | 'apple';
+  platform: 'stripe' | 'apple' | 'whop';
   status: string;
   plan?: string | null;
   externalCustomerId?: string | null;
@@ -95,7 +150,7 @@ export interface SubscriptionUpdate {
   raw?: unknown;
 }
 
-const ACTIVE_STATUSES = new Set(['active', 'trialing', 'past_due']);
+const ACTIVE_STATUSES = new Set(['active', 'trialing', 'past_due', 'completed', 'valid']);
 
 /**
  * Applies a subscription change from either platform.
@@ -181,13 +236,15 @@ export async function verifyStripeSignature(
  * — because a dev backdoor that survives into production is a catastrophe.
  */
 export async function grantDevelopmentPlus(db: Database, userId: string): Promise<void> {
-  if (isStripeConfigured() || process.env.NODE_ENV === 'production') {
+  // Dev unlock stays available locally even though Whop plan IDs ship as defaults —
+  // a real WHOP_API_KEY (or production) turns it off.
+  if (process.env.WHOP_API_KEY || isStripeConfigured() || process.env.NODE_ENV === 'production') {
     throw new ViolaError('forbidden', 'development upgrade is disabled');
   }
 
   await upsertSubscription(db, {
     userId,
-    platform: 'stripe',
+    platform: 'whop',
     status: 'active',
     plan: 'monthly',
     currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000),

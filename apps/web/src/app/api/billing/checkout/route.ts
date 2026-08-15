@@ -4,7 +4,7 @@ import { isViolaError } from '@viola/core';
 import { schema } from '@viola/db';
 import { db } from '@/lib/db';
 import { getViewer } from '@/lib/identity';
-import { createCheckoutSession, isStripeConfigured } from '@/lib/billing';
+import { createCheckoutSession, isLiveWebBilling } from '@/lib/billing';
 
 export const runtime = 'nodejs';
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   if (!viewer.userId)
     return NextResponse.json({ error: { code: 'unauthorized' } }, { status: 401 });
 
-  if (!isStripeConfigured()) {
+  if (!isLiveWebBilling()) {
     return NextResponse.json(
       { error: { code: 'provider_failed', message: 'Checkout is not set up yet.' } },
       { status: 502 },
