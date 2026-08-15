@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition, type CSSProperties } from 'react';
 
 import { formatCount } from '@/lib/format';
 
@@ -12,9 +12,9 @@ import { formatCount } from '@/lib/format';
  * media, and a public negative signal is the mechanism that does it. Blooms and
  * views are the only counters we show, and both only ever go up.
  *
- * Works for signed-out visitors. That is deliberate and load-bearing — a share
- * recipient hitting an auth wall is the single most expensive step you can put
- * in a viral loop.
+ * Motion: transitions.dev **like-button** recipe, recolored to Viola violet.
+ * Pop scale lives on an HTML wrapper around the SVG (Chromium otherwise
+ * rasterises the SVG during transform). Particles fire only on the way in.
  */
 
 interface BloomButtonProps {
@@ -24,21 +24,40 @@ interface BloomButtonProps {
   size?: 'sm' | 'lg';
 }
 
+const PARTICLE_VECTORS = [
+  { px: '-18px', py: '-16px', psize: 1.1 },
+  { px: '16px', py: '-18px', psize: 0.9 },
+  { px: '-20px', py: '4px', psize: 1 },
+  { px: '20px', py: '2px', psize: 1.15 },
+  { px: '-10px', py: '18px', psize: 0.85 },
+  { px: '12px', py: '16px', psize: 1 },
+  { px: '0px', py: '-22px', psize: 0.95 },
+  { px: '4px', py: '20px', psize: 1.05 },
+];
+
 export function BloomButton({ slug, initialCount, initialBloomed, size = 'sm' }: BloomButtonProps) {
   const [bloomed, setBloomed] = useState(initialBloomed);
   const [count, setCount] = useState(initialCount);
-  const [burst, setBurst] = useState(0);
+  const [bursting, setBursting] = useState(false);
   const [pending, startTransition] = useTransition();
+  const burstTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (burstTimer.current) clearTimeout(burstTimer.current);
+    };
+  }, []);
 
   const large = size === 'lg';
 
   function handleClick() {
     if (bloomed || pending) return;
 
-    // Optimistic: the burst has to land on the tap, not after a round trip.
     setBloomed(true);
     setCount((c) => c + 1);
-    setBurst((b) => b + 1);
+    setBursting(true);
+    if (burstTimer.current) clearTimeout(burstTimer.current);
+    burstTimer.current = setTimeout(() => setBursting(false), 650);
 
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate?.(8);
@@ -51,9 +70,9 @@ export function BloomButton({ slug, initialCount, initialBloomed, size = 'sm' }:
         const data = (await response.json()) as { bloomCount: number };
         setCount(data.bloomCount);
       } catch {
-        // Roll back rather than leaving a lie on screen.
         setBloomed(false);
         setCount((c) => Math.max(0, c - 1));
+        setBursting(false);
       }
     });
   }
@@ -65,19 +84,38 @@ export function BloomButton({ slug, initialCount, initialBloomed, size = 'sm' }:
       disabled={bloomed}
       aria-pressed={bloomed}
       aria-label={bloomed ? `Bloomed. ${count} blooms` : `Give this look a bloom. ${count} blooms`}
+      data-liked={bloomed ? 'true' : 'false'}
       className={[
-        'group relative inline-flex items-center gap-2 rounded-full transition-all',
+        't-like group relative inline-flex items-center gap-2 rounded-full transition-all',
         'border border-[var(--color-hairline)]',
         large ? 'px-5 py-3 text-[15px]' : 'px-3.5 py-2 text-[13px]',
         bloomed
           ? 'border-transparent bg-[var(--color-viola)] text-white'
           : 'bg-[rgba(255,255,255,0.04)] text-[var(--color-text-secondary)] hover:border-[rgba(124,92,252,0.4)] hover:bg-[rgba(124,92,252,0.14)] hover:text-white',
         'active:scale-[0.96]',
+        bursting ? 'is-bursting' : '',
       ].join(' ')}
     >
       <span className="relative flex items-center justify-center">
-        <PetalIcon filled={bloomed} size={large ? 18 : 15} />
-        {burst > 0 && <PetalBurst key={burst} />}
+        <span className="t-like-icon">
+          <PetalIcon filled={bloomed} size={large ? 18 : 15} />
+        </span>
+        <span className="t-like-particles" aria-hidden="true">
+          {PARTICLE_VECTORS.map((p, i) => (
+            <i
+              key={i}
+              style={
+                {
+                  '--px': p.px,
+                  '--py': p.py,
+                  '--psize': p.psize,
+                  '--pdelay': `${i * 18}ms`,
+                  '--p-end-scale': i % 2 === 0 ? 0.55 : 0.7,
+                } as CSSProperties
+              }
+            />
+          ))}
+        </span>
       </span>
       <span className="stat tabular-nums">{formatCount(count)}</span>
     </button>
@@ -95,25 +133,5 @@ function PetalIcon({ filled, size }: { filled: boolean; size: number }) {
         strokeLinejoin="round"
       />
     </svg>
-  );
-}
-
-/** The little violet burst. The one moment of pure delight in the interface. */
-function PetalBurst() {
-  const petals = [0, 60, 120, 180, 240, 300];
-  return (
-    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-      {petals.map((angle, i) => (
-        <span
-          key={angle}
-          className="absolute h-1.5 w-1.5 rounded-full"
-          style={{
-            background: i % 2 === 0 ? 'var(--color-orchid)' : 'var(--color-blush)',
-            transform: `rotate(${angle}deg) translateY(-8px)`,
-            animation: `viola-petal 620ms var(--ease-bouncy) ${i * 24}ms both`,
-          }}
-        />
-      ))}
-    </span>
   );
 }

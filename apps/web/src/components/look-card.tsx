@@ -61,7 +61,7 @@ export function LookCard({ look, animate = false, priority = false }: LookCardPr
               <span className="display text-[19px] leading-none text-white">
                 {look.archetypeName}
               </span>
-              <span className="stat text-[16px] leading-none text-white/70">{look.score}</span>
+              <ScoreDigits value={look.score} animate={animate} />
             </div>
           </div>
         )}
@@ -73,6 +73,29 @@ export function LookCard({ look, animate = false, priority = false }: LookCardPr
         </div>
       </div>
     </div>
+  );
+}
+
+/** transitions.dev number pop-in — last two digits stagger so the score feels alive. */
+function ScoreDigits({ value, animate }: { value: number; animate: boolean }) {
+  const chars = String(value).split('');
+  return (
+    <span
+      className={['t-digit-group stat text-[16px] leading-none text-white/70', animate ? 'is-animating' : '']
+        .filter(Boolean)
+        .join(' ')}
+      aria-label={String(value)}
+    >
+      {chars.map((ch, i) => {
+        const fromEnd = chars.length - 1 - i;
+        const stagger = fromEnd === 1 ? '1' : fromEnd === 0 ? '2' : undefined;
+        return (
+          <span key={`${ch}-${i}`} className="t-digit" data-stagger={stagger}>
+            {ch}
+          </span>
+        );
+      })}
+    </span>
   );
 }
 

@@ -289,7 +289,7 @@ export function UploadFlow() {
         {phase === 'processing' && (
           <div
             className="pointer-events-none absolute inset-x-0 h-[36%] bg-gradient-to-b from-transparent via-[rgba(124,92,252,0.22)] to-transparent"
-            style={{ animation: 'viola-scan 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
+            style={{ animation: 'viola-scan 2.4s var(--ease-linear, linear) infinite' }}
           />
         )}
 
@@ -297,21 +297,38 @@ export function UploadFlow() {
           {score ? (
             <div className="animate-pop flex items-baseline gap-3 rounded-full bg-[var(--color-viola)] px-6 py-3 shadow-[var(--shadow-glow)]">
               <span className="display text-[24px] leading-none text-white">{score.archetype}</span>
-              <span className="stat text-[20px] leading-none text-white/75">{score.value}</span>
+              <span className="t-digit-group is-animating stat text-[20px] leading-none text-white/75">
+                {String(score.value)
+                  .split('')
+                  .map((ch, i, arr) => {
+                    const fromEnd = arr.length - 1 - i;
+                    const stagger = fromEnd === 1 ? '1' : fromEnd === 0 ? '2' : undefined;
+                    return (
+                      <span key={`${ch}-${i}`} className="t-digit" data-stagger={stagger}>
+                        {ch}
+                      </span>
+                    );
+                  })}
+              </span>
             </div>
           ) : (
-            <>
-              <p className="display text-[26px] text-white">
+            <div className="t-stagger is-shown text-center">
+              <strong className="t-stagger-line t-stagger-line--1 display text-[26px] text-white">
                 {phase === 'preparing' ? 'Getting your photo ready' : 'Voilà, almost'}
-              </p>
-              <p className="mt-2 h-5 text-[13px] text-white/70">
+              </strong>
+              <span
+                className={[
+                  't-stagger-line t-stagger-line--2 mt-2 text-[13px]',
+                  phase === 'processing' ? 't-shimmer' : 'text-white/70',
+                ].join(' ')}
+              >
                 {found.length > 0 && revealed < found.length
                   ? `Found ${revealed} of ${found.length} pieces`
                   : stage
                     ? (STAGE_COPY[stage] ?? 'Working on it')
                     : 'Getting started'}
-              </p>
-            </>
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -323,7 +340,7 @@ export function UploadFlow() {
           <li
             key={item.id}
             className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-4 py-3"
-            style={{ animation: `viola-rise 380ms var(--ease-gentle) ${index * 70}ms both` }}
+            style={{ animation: `viola-rise var(--duration-reveal) var(--ease-gentle) ${index * 70}ms both` }}
           >
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-viola-soft)]">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">

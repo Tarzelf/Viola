@@ -43,21 +43,63 @@ interface LookGalleryProps {
 export function LookGallery({ looks, openIndex, onClose, onIndexChange }: LookGalleryProps) {
   const titleId = useId();
   const thumbRailRef = useRef<HTMLDivElement>(null);
-  const open = openIndex !== null && looks.length > 0;
-  const index = openIndex ?? 0;
-  const look = looks[index];
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(false);
+  const [mounted, setMounted] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  const wantOpen = openIndex !== null && looks.length > 0;
+
+  useEffect(() => {
+    if (wantOpen && openIndex !== null) {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      setIndex(openIndex);
+      setClosing(false);
+      if (!mountedRef.current) {
+        mountedRef.current = true;
+        setMounted(true);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setOpening(true));
+        });
+      } else {
+        setOpening(true);
+      }
+      return;
+    }
+
+    if (!mountedRef.current) return;
+    setOpening(false);
+    setClosing(true);
+    closeTimer.current = setTimeout(() => {
+      mountedRef.current = false;
+      setMounted(false);
+      setClosing(false);
+    }, 160);
+
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, [wantOpen, openIndex]);
+
+  // Sync index while open when parent arrows via props.
+  useEffect(() => {
+    if (openIndex !== null) setIndex(openIndex);
+  }, [openIndex]);
 
   const go = useCallback(
     (next: number) => {
       if (looks.length === 0) return;
       const wrapped = ((next % looks.length) + looks.length) % looks.length;
+      setIndex(wrapped);
       onIndexChange?.(wrapped);
     },
     [looks.length, onIndexChange],
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!mounted || closing) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -76,23 +118,29 @@ export function LookGallery({ looks, openIndex, onClose, onIndexChange }: LookGa
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
     };
-  }, [open, index, go, onClose]);
+  }, [mounted, closing, index, go, onClose]);
 
-  // Keep the active thumb in view as the user arrows through.
   useEffect(() => {
-    if (!open || !thumbRailRef.current) return;
+    if (!mounted || !thumbRailRef.current) return;
     const active = thumbRailRef.current.querySelector<HTMLElement>('[data-active="true"]');
     active?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-  }, [open, index]);
+  }, [mounted, index]);
 
-  if (!open || !look) return null;
+  const look = looks[index];
+  if (!mounted || !look) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-0 z-[500] flex flex-col bg-[rgba(11,10,15,0.94)] backdrop-blur-xl"
+      className={[
+        't-modal fixed inset-0 z-[500] flex flex-col bg-[rgba(11,10,15,0.94)] backdrop-blur-xl',
+        opening ? 'is-open' : '',
+        closing ? 'is-closing' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <header className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <p id={titleId} className="min-w-0 truncate text-[14px] text-[var(--color-text-secondary)]">
