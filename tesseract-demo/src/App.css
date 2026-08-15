@@ -1,0 +1,245 @@
+.app {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  width: 100%;
+  height: 100%;
+}
+
+.scene-container {
+  position: relative;
+  min-width: 0;
+  background: radial-gradient(ellipse at 50% 20%, #12122a 0%, #050508 70%);
+}
+
+.axis-legend {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+  pointer-events: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #1e1e2e;
+  background: #0a0a10;
+  overflow-y: auto;
+}
+
+.panel-header {
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid #1e1e2e;
+  position: sticky;
+  top: 0;
+  background: #0a0a10;
+  z-index: 1;
+}
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7ec8e3;
+}
+
+.panel-header h1 {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mode-toggle button {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #2a2a3e;
+  border-radius: 6px;
+  background: transparent;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.mode-toggle button.active {
+  background: #1a1a2e;
+  border-color: #c9a0ff;
+  color: #e8e6e3;
+}
+
+.panel-empty {
+  padding: 1.25rem;
+}
+
+.hint-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+}
+
+.panel-empty ul {
+  margin: 0 0 1.5rem;
+  padding-left: 1.1rem;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.panel-empty li {
+  margin-bottom: 0.4rem;
+}
+
+.philosophy {
+  margin: 0;
+  padding: 1rem;
+  border-left: 2px solid #f5d76e;
+  color: #999;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.panel-body {
+  padding: 1.25rem;
+}
+
+.when {
+  margin: 0 0 0.25rem;
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.panel-body h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  margin: 0 0.5rem 0.75rem 0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge.present {
+  background: #2a2510;
+  color: #f5d76e;
+}
+
+.badge.fork {
+  background: #1f1530;
+  color: #c9a0ff;
+}
+
+.badge.branch {
+  background: #0f1f28;
+  color: #7ec8e3;
+}
+
+.reality {
+  margin: 0 0 1.25rem;
+  color: #bbb;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.fork-section {
+  margin-bottom: 1.25rem;
+}
+
+.fork-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  color: #c9a0ff;
+  font-weight: 500;
+}
+
+.alternate-card {
+  margin-bottom: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid #2a2a3e;
+  border-radius: 8px;
+  background: #0f0f18;
+}
+
+.alternate-card h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  color: #e8e6e3;
+}
+
+.alternate-card p {
+  margin: 0 0 0.4rem;
+  font-size: 0.88rem;
+  color: #999;
+}
+
+.alternate-card .feeling {
+  margin: 0;
+  font-style: italic;
+  color: #7ec8e3;
+  font-size: 0.82rem;
+}
+
+.nav-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+}
+
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.nav-buttons button {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #2a2a3e;
+  border-radius: 6px;
+  background: #12121c;
+  color: #ccc;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+
+.nav-buttons button:hover {
+  border-color: #f5d76e;
+  color: #fff;
+}
+
+.disclaimer {
+  margin: 1.5rem 0 0;
+  font-size: 0.75rem;
+  color: #555;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 55vh 1fr;
+  }
+
+  .panel {
+    border-left: none;
+    border-top: 1px solid #1e1e2e;
+  }
+}
