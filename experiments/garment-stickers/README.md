@@ -24,8 +24,8 @@ Segmentation takes about 2 seconds for a 1400×2100 photo.
 ### 1. Generic background removal — FAILED
 
 `@imgly/background-removal-node` (U2Net). The obvious first reach, and it does
-not work for this, because it removes the *background* and keeps the whole
-*person*. Cropping to a garment box and running it returns the garment plus
+not work for this, because it removes the _background_ and keeps the whole
+_person_. Cropping to a garment box and running it returns the garment plus
 whatever skin, hair and neighbouring clothing shares that box.
 
 The "t-shirt sticker" came back with a chin and a hand attached. Not close to
@@ -60,12 +60,12 @@ a fast way to find a representative test image.
 
 Quality scales with how big the garment is in frame:
 
-| Garment | Source size | Result |
-|---|---|---|
-| Trousers | 721×699 | excellent — the wide-leg shape is unmistakable |
-| Bag | 60×90 | good, clearly readable |
-| Upper layer | 141×123 | usable, some colour bleed at the edge |
-| Shoes | 97×39 | soft; has to be upscaled to read on a card |
+| Garment     | Source size | Result                                         |
+| ----------- | ----------- | ---------------------------------------------- |
+| Trousers    | 721×699     | excellent — the wide-leg shape is unmistakable |
+| Bag         | 60×90       | good, clearly readable                         |
+| Upper layer | 141×123     | usable, some colour bleed at the edge          |
+| Shoes       | 97×39       | soft; has to be upscaled to read on a card     |
 
 ### Three bugs worth knowing about
 
@@ -118,18 +118,18 @@ Neither of these errors — they just produce a fully transparent sticker:
 resolution, dimmed and desaturated for indoor light, lifted blacks, slight
 handshake blur, sensor noise and aggressive JPEG.
 
-| Garment | Studio | Phone conditions |
-|---|---|---|
-| Trousers | excellent | still good — large garments are robust |
-| Bag | clean silhouette | silhouette breaks, gains a false notch |
-| Upper layer | usable | mushy |
-| Shoes | soft | barely recognisable |
+| Garment     | Studio           | Phone conditions                       |
+| ----------- | ---------------- | -------------------------------------- |
+| Trousers    | excellent        | still good — large garments are robust |
+| Bag         | clean silhouette | silhouette breaks, gains a false notch |
+| Upper layer | usable           | mushy                                  |
+| Shoes       | soft             | barely recognisable                    |
 
 The pattern is consistent: **the smaller the garment sits in frame, the sooner
 it falls apart.** Shoes are the first casualty and also one of the most
 shoppable categories in fashion, which is an awkward combination.
 
-Worth being explicit that this is still a *simulation*. It reproduces
+Worth being explicit that this is still a _simulation_. It reproduces
 resolution, noise and lighting, but not a cluttered bedroom, a phone visible in
 the mirror, or an awkward angle. A genuine amateur mirror selfie will be
 harder than this.
@@ -137,7 +137,7 @@ harder than this.
 ## The catch: granularity
 
 The taxonomy is **category-level, not item-level**. The test photo has a red
-graphic tee *and* a black jacket, and the model labels both as one
+graphic tee _and_ a black jacket, and the model labels both as one
 `Upper-clothes` region. It cannot tell you there are two garments there, and it
 cannot separate them.
 
@@ -151,20 +151,20 @@ photo. That still needs the vision model.
 
 The two approaches are complementary rather than competing:
 
-| | Cut-out sticker | Catalogue image |
-|---|---|---|
-| Needs an API key | no | yes |
-| Cost per look | zero | ~$0.027 |
-| Shows the actual item worn | yes | no |
-| Sharp enough to shop from | no | yes |
-| Granularity | category | per item |
+|                            | Cut-out sticker | Catalogue image |
+| -------------------------- | --------------- | --------------- |
+| Needs an API key           | no              | yes             |
+| Cost per look              | zero            | ~$0.027         |
+| Shows the actual item worn | yes             | no              |
+| Sharp enough to shop from  | no              | yes             |
+| Granularity                | category        | per item        |
 
 ## Two gotchas that cost real time
 
-**`dest-in` does not mask with a greyscale image.** It reads the *source's
-alpha*, and a greyscale PNG is opaque everywhere, so compositing a mask that
+**`dest-in` does not mask with a greyscale image.** It reads the _source's
+alpha_, and a greyscale PNG is opaque everywhere, so compositing a mask that
 way silently does nothing — you get the full rectangle back. The mask has to
-*become* the alpha channel. This bit twice: once masking the photo, once
+_become_ the alpha channel. This bit twice: once masking the photo, once
 building the sticker keyline, which rendered as a white box instead of hugging
 the silhouette.
 

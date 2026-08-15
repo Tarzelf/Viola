@@ -20,6 +20,7 @@ export * from './vision/gemini';
 export * from './product/mock';
 export * from './product/fixtures';
 export * from './product/serpapi';
+export * from './product/visual';
 export * from './affiliate/index';
 export * from './affiliate/transactions';
 export * from './storage/index';

@@ -51,6 +51,47 @@ mirror selfie.
 Thumbnails are hotlinked from Google's CDN and expire, so the imagery stage
 re-hosts every one into your own storage before anything renders.
 
+### Visual search: look-alikes, dupes, and unbranded items
+
+Text search only works when a logo was visible, which covers a minority of real
+outfits. Searching "white crop top" returns ten thousand white crop tops and
+none of them are hers.
+
+Visual search answers the other question — "find things that look like THIS" —
+using the same SerpApi key via the Google Lens engine:
+
+- `exact_matches` → where to buy the actual item
+- `visual_matches` → look-alikes and cheaper dupes, with prices
+
+As of August 2026 SerpApi accepts **direct image upload** via `image_id`, so a
+garment cutout never has to be published to a public URL first. That matters
+here: it avoids putting a crop of someone's photo on the open internet just to
+search with it.
+
+**The segmentation output is the query.** Feeding the whole photo to a reverse
+image search returns "woman standing in front of a green wall". Feeding an
+isolated cutout of the trousers returns trousers. The sticker work is not just
+decoration — it is what makes visual search usable.
+
+The pipeline picks per garment (`packages/pipeline/src/matching.ts`):
+
+| Situation             | Strategy                            | Lookups |
+| --------------------- | ----------------------------------- | ------- |
+| Logo visible + cutout | text for the pick, visual for dupes | 2       |
+| No logo, has cutout   | visual for everything               | 1       |
+| No usable cutout      | text only, results will be vague    | 1       |
+
+Visual runs even on a branded item, because "where else, cheaper" is a question
+text search cannot answer, and it is the reason anyone opens the dupes rail.
+
+**Alternatives considered.** Bing Visual Search is $10–15 per 1,000. Syte is
+fashion-specific and by far the most accurate for apparel — it understands
+sleeve length, silhouette and pattern rather than generic image similarity —
+but it is enterprise-priced in the low-to-mid five figures a year. ViSenze
+starts around $99/month. Lens is the right call at this stage purely because it
+reuses one key and one account; Syte is the upgrade path if visual match
+quality becomes the thing limiting conversion.
+
 ## 3. Affiliate — the commission
 
 This is the "one solution that includes everything" answer.
