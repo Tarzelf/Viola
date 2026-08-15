@@ -63,6 +63,8 @@ describe('migrations', () => {
       'affiliate_clicks',
       'affiliate_transactions',
       'sponsored_placements',
+      'waitlist',
+      'invite_codes',
     ]) {
       expect(names.has(expected), `missing table: ${expected}`).toBe(true);
     }

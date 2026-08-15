@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Wordmark } from '@/components/app-shell';
+import { Wordmark } from '@/components/wordmark';
 
 export default function NotFound() {
   return (

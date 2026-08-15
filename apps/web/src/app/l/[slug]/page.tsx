@@ -13,7 +13,7 @@ import { SaveButton } from '@/components/save-button';
 import { ShareRow } from '@/components/share-row';
 import { ViewPing } from '@/components/view-ping';
 import { ReportMenu } from '@/components/report-menu';
-import { Wordmark } from '@/components/app-shell';
+import { Wordmark } from '@/components/wordmark';
 
 export const dynamic = 'force-dynamic';
 

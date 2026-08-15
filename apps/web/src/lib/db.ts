@@ -32,6 +32,16 @@ async function initialise(): Promise<DbHandle> {
       console.info(
         `[viola] seeded a fresh local database: ${result.looks} looks, ${result.items} items`,
       );
+    } else {
+      // Soft-launch invites for DBs that predate the waitlist migration.
+      const invites = await handle.db.select().from(schema.inviteCodes).limit(1);
+      if (invites.length === 0) {
+        await handle.db.insert(schema.inviteCodes).values([
+          { code: 'VIOLA2026', maxUses: 100, note: 'founding batch' },
+          { code: 'MAYA', maxUses: 25, note: 'creator friends' },
+        ]);
+        console.info('[viola] seeded invite codes');
+      }
     }
 
     // Artwork and layouts for the seeded rows. Idempotent, so it also backfills

@@ -2,6 +2,7 @@ import { computeScore, generateSlug, getArchetype, type ScoreBreakdown } from '@
 import type { Database } from './client';
 import {
   blooms,
+  inviteCodes,
   lookItems,
   lookViews,
   looks,
@@ -434,6 +435,12 @@ export async function seed(db: Database): Promise<SeedResult> {
     frequency: 7,
     isActive: true,
   });
+
+  // --- soft-launch invites -------------------------------------------------
+  await db.insert(inviteCodes).values([
+    { code: 'VIOLA2026', maxUses: 100, note: 'founding batch' },
+    { code: 'MAYA', maxUses: 25, note: 'creator friends' },
+  ]);
 
   return { users: people.length, looks: lookCount, items: itemCount, products: PRODUCTS.length };
 }

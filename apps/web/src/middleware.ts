@@ -1,20 +1,33 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * CORS for the API.
+ * Middleware: CORS for Expo web + optional invite-only soft launch.
  *
- * A real iOS build does not need this — native fetch has no origin and is not
- * subject to CORS at all. But the Expo *web* target is how the mobile app gets
- * verified on a machine without Xcode, and that runs on a different port, so
- * without this the app renders perfectly and then fails every request.
- *
- * The allowlist is explicit rather than a wildcard. Credentials are involved
- * (the guest cookie), and `Access-Control-Allow-Origin: *` cannot be combined
- * with credentials anyway — browsers reject it. Extra origins can be added via
- * VIOLA_CORS_ORIGINS for a deployed Expo web build.
+ * Share pages (`/l/*`), shop redirects, legal, early-access, and the API stay
+ * reachable without an invite — value-before-account is non-negotiable. The
+ * rest of the product can be gated with VIOLA_INVITE_ONLY=1.
  */
 
 const DEV_ORIGINS = ['http://localhost:8081', 'http://127.0.0.1:8081', 'http://localhost:19006'];
+
+const PUBLIC_PREFIXES = [
+  '/',
+  '/l/',
+  '/go/',
+  '/early',
+  '/privacy',
+  '/terms',
+  '/contact',
+  '/plus',
+  '/api/',
+  '/_next',
+  '/fonts',
+  '/favicon',
+  '/signin',
+];
+
+/** Paths that require an invite when soft-launch is on. */
+const GATED_PREFIXES = ['/new', '/vaults', '/settings', '/earnings', '/moderation'];
 
 function allowedOrigins(): string[] {
   const configured = (process.env.VIOLA_CORS_ORIGINS ?? '')
@@ -32,18 +45,34 @@ function corsHeaders(origin: string): Record<string, string> {
     'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS',
     'access-control-allow-headers': 'content-type,authorization',
     'access-control-max-age': '86400',
-    // Responses differ per origin, so caches must not share them.
     vary: 'Origin',
   };
 }
 
+function isGatedPath(pathname: string): boolean {
+  return GATED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Soft-launch: browse + share stay open; posting / vaults / settings need invite.
+  if (
+    process.env.VIOLA_INVITE_ONLY === '1' &&
+    isGatedPath(pathname) &&
+    !request.cookies.get('viola_invite')?.value
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/early';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+
   const origin = request.headers.get('origin');
   if (!origin || !allowedOrigins().includes(origin)) return NextResponse.next();
 
   const headers = corsHeaders(origin);
 
-  // Preflight has to be answered before the route handler runs.
   if (request.method === 'OPTIONS') {
     return new NextResponse(null, { status: 204, headers });
   }
@@ -54,5 +83,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/api/:path*',
+  matcher: ['/((?!_next/static|_next/image|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)'],
 };

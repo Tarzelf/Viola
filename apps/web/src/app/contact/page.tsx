@@ -45,6 +45,16 @@ export default function ContactPage() {
             blocking hides their content from you and yours from them, immediately.
           </p>
         </div>
+
+        <p className="mt-8 text-[13px] text-[var(--color-text-tertiary)]">
+          <a href="/privacy" className="text-[var(--color-viola-text)] hover:underline">
+            Privacy Policy
+          </a>
+          {' · '}
+          <a href="/terms" className="text-[var(--color-viola-text)] hover:underline">
+            Terms of Use
+          </a>
+        </p>
       </div>
     </AppShell>
   );

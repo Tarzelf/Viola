@@ -286,11 +286,36 @@
     opacity var(--modal-close-dur) var(--modal-ease);
 }
 
+/* Error shake — transitions.dev error-state-shake, simplified */
+@keyframes t-shake-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(calc(var(--distance-small, 6px) * -1));
+  }
+  40% {
+    transform: translateX(var(--distance-small, 6px));
+  }
+  60% {
+    transform: translateX(calc(var(--distance-base, 8px) * -1));
+  }
+  80% {
+    transform: translateX(var(--distance-base, 8px));
+  }
+}
+
+.t-shake {
+  animation: t-shake-x 320ms var(--ease-smooth-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .t-digit-group .t-digit,
   .t-like-icon,
   .t-like-particles i,
-  .t-shimmer {
+  .t-shimmer,
+  .t-shake {
     animation: none !important;
   }
 

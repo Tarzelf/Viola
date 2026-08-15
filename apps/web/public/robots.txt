@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /l/
+Allow: /early
+Allow: /privacy
+Allow: /terms
+Allow: /contact
+Disallow: /api/
+Disallow: /settings
+Disallow: /moderation
+
+Sitemap: https://viola.app/sitemap.xml

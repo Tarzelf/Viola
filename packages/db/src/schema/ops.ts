@@ -136,3 +136,29 @@ export const jobs = pgTable(
     uniqueIndex('jobs_look_stage_key').on(t.lookId, t.stage),
   ],
 );
+
+/**
+ * Soft-launch waitlist.
+ *
+ * Captures emails before (or instead of) full open registration. Invite codes
+ * gate the product when VIOLA_INVITE_ONLY=1.
+ */
+export const waitlist = pgTable(
+  'waitlist',
+  {
+    id: id(),
+    email: text('email').notNull(),
+    source: text('source').notNull().default('early'),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex('waitlist_email_key').on(t.email)],
+);
+
+export const inviteCodes = pgTable('invite_codes', {
+  code: text('code').primaryKey(),
+  maxUses: integer('max_uses').notNull().default(1),
+  uses: integer('uses').notNull().default(0),
+  note: text('note'),
+  createdAt: createdAt(),
+});
+

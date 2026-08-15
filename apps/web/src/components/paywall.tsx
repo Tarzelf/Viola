@@ -1,19 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { emit } from '@/lib/client-analytics';
 import Link from 'next/link';
 
 /**
  * The paywall sheet.
  *
- * Shown only at the moment someone hits a limit, never pre-emptively. A paywall
- * that interrupts before the user has felt the value is the fastest way to lose
- * them, and the free tier is deliberately generous enough that reaching this
- * means they are already invested.
- *
- * The copy names the specific thing they were trying to do, because a generic
- * "upgrade to Pro" converts far worse than "you've filled your vault".
+ * Shown only at the moment someone hits a limit, never pre-emptively. Motion
+ * uses the transitions.dev modal recipe (scale + fade).
  */
 
 export interface PaywallProps {
@@ -32,9 +27,39 @@ const BENEFITS = [
 ] as const;
 
 export function Paywall({ open, onClose, title, body }: PaywallProps) {
+  const [mounted, setMounted] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const mountedRef = useRef(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    if (!open) return;
-    emit('paywall_shown', { trigger: title });
+    if (open) {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      setClosing(false);
+      emit('paywall_shown', { trigger: title });
+      if (!mountedRef.current) {
+        mountedRef.current = true;
+        setMounted(true);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setOpening(true));
+        });
+      } else {
+        setOpening(true);
+      }
+    } else if (mountedRef.current) {
+      setOpening(false);
+      setClosing(true);
+      closeTimer.current = setTimeout(() => {
+        mountedRef.current = false;
+        setMounted(false);
+        setClosing(false);
+      }, 160);
+    }
+  }, [open, title]);
+
+  useEffect(() => {
+    if (!mounted || closing) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -42,9 +67,9 @@ export function Paywall({ open, onClose, title, body }: PaywallProps) {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [open, onClose, title]);
+  }, [mounted, closing, onClose]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 z-[400] flex items-end justify-center sm:items-center">
@@ -59,7 +84,13 @@ export function Paywall({ open, onClose, title, body }: PaywallProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="paywall-title"
-        className="animate-rise relative w-full max-w-[420px] rounded-t-[var(--radius-xl)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-6 pt-7 pb-8 sm:rounded-[var(--radius-xl)]"
+        className={[
+          't-modal relative w-full max-w-[420px] rounded-t-[var(--radius-xl)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-6 pt-7 pb-8 sm:rounded-[var(--radius-xl)]',
+          opening ? 'is-open' : '',
+          closing ? 'is-closing' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <p className="label-caps text-[var(--color-viola-text)]">Viola Plus</p>
         <h2 id="paywall-title" className="display mt-2 text-[28px] leading-tight text-white">

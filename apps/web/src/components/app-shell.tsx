@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { getViewer } from '@/lib/identity';
 import { getProfileForUser } from '@/lib/queries';
 import { AccountMenu } from './account-menu';
+import { Wordmark } from './wordmark';
+
+export { Wordmark };
 
 /**
  * App chrome.
@@ -21,15 +24,6 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <Footer />
       <MobileBar />
     </div>
-  );
-}
-
-export function Wordmark({ size = 22 }: { size?: number }) {
-  return (
-    <span className="display leading-none text-white" style={{ fontSize: size }}>
-      Viola
-      <span className="text-[var(--color-viola)]">.</span>
-    </span>
   );
 }
 
@@ -79,6 +73,24 @@ function Footer() {
           className="text-[12px] text-[var(--color-text-tertiary)] transition-colors hover:text-white"
         >
           Contact
+        </Link>
+        <Link
+          href="/privacy"
+          className="text-[12px] text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+        >
+          Privacy
+        </Link>
+        <Link
+          href="/terms"
+          className="text-[12px] text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+        >
+          Terms
+        </Link>
+        <Link
+          href="/early"
+          className="text-[12px] text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+        >
+          Early access
         </Link>
         <Link
           href="/plus"

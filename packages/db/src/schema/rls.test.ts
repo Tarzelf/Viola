@@ -57,6 +57,8 @@ describe('row level security', () => {
       'affiliate_clicks',
       'affiliate_transactions',
       'subscriptions',
+      'waitlist',
+      'invite_codes',
     ]) {
       expect(enabled.get(table), `${table} must have RLS enabled`).toBe(true);
     }
