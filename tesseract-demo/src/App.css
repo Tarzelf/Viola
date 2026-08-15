@@ -232,6 +232,39 @@
   font-style: italic;
 }
 
+.video-preview {
+  margin: 0 0 1rem;
+}
+
+.video-preview-inner {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #2a2a3e;
+  background: #000;
+}
+
+.preview-clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.8s ease;
+}
+
+.preview-clip-alt {
+  z-index: 1;
+}
+
+.video-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #7ec8e3;
+  font-style: italic;
+}
+
 @media (max-width: 900px) {
   .app {
     grid-template-columns: 1fr;

@@ -7,6 +7,9 @@ import type { Moment } from "../types";
  * - Z axis = time (0 = present, negative = past)
  * - X axis = timeline branches (0 = main path, ± = alternates)
  * - Y axis = slight lift for emphasis on fork points
+ *
+ * Videos: placeholder ambient loops in /public/videos/.
+ * Replace with Grok-generated clips via `npm run generate:videos`.
  */
 export const moments: Moment[] = [
   {
@@ -18,6 +21,9 @@ export const moments: Moment[] = [
     position: [0, 0, 0],
     isPresent: true,
     connectsTo: ["almost-said-it"],
+    videoUrl: "/videos/present.mp4",
+    videoPrompt:
+      "Slow cinematic drift through soft morning light, abstract present-moment stillness, shallow depth of field",
   },
   {
     id: "almost-said-it",
@@ -46,6 +52,12 @@ export const moments: Moment[] = [
     isFork: true,
     connectsTo: ["present", "job-offer"],
     branchIds: ["branch-said-it", "branch-wrote-it"],
+    videoUrl: "/videos/silence.mp4",
+    alternateVideoUrl: "/videos/fork-warm.mp4",
+    videoPrompt:
+      "Rain on window at night, two silhouettes at a table, heavy silence, slow push-in, melancholic",
+    alternateVideoPrompt:
+      "Same room — one person leans forward speaking, the other's shoulders drop with relief, warm lamp light",
   },
   {
     id: "branch-said-it",
@@ -55,6 +67,7 @@ export const moments: Moment[] = [
       "The relationship doesn't magically fix. But something unblocks. A tension that had been calcifying gets air. You don't know if it lasts — but that week, you sleep differently.",
     position: [4, 0.5, -5],
     connectsTo: ["job-offer-alt"],
+    videoUrl: "/videos/fork-warm.mp4",
   },
   {
     id: "branch-wrote-it",
@@ -64,6 +77,7 @@ export const moments: Moment[] = [
       "A letter, sent at 2am. They read it twice. The conversation happens slower, on paper first — which gives you both room to not perform.",
     position: [-4, 0.5, -5],
     connectsTo: ["job-offer"],
+    videoUrl: "/videos/fork-cool.mp4",
   },
   {
     id: "job-offer",
@@ -92,6 +106,12 @@ export const moments: Moment[] = [
     isFork: true,
     connectsTo: ["almost-said-it", "moved-here"],
     branchIds: ["branch-took-job", "branch-stayed"],
+    videoUrl: "/videos/stayed.mp4",
+    alternateVideoUrl: "/videos/left.mp4",
+    videoPrompt:
+      "Quiet suburban morning, kitchen table, coffee steam, someone sits down slowly, stayed-home energy",
+    alternateVideoPrompt:
+      "Same kitchen but suitcase by the door, city skyline through window, bittersweet departure light",
   },
   {
     id: "branch-took-job",
@@ -101,6 +121,7 @@ export const moments: Moment[] = [
       "First six months: loneliness, then competence. You build a self that doesn't need the old room to know who it is. Holidays are expensive. You are harder and more free.",
     position: [5, 0.5, -11],
     connectsTo: ["moved-here-alt"],
+    videoUrl: "/videos/left.mp4",
   },
   {
     id: "branch-stayed",
@@ -110,6 +131,7 @@ export const moments: Moment[] = [
       "The life you know. Not lesser — just the path where comfort won the argument that year.",
     position: [-5, 0.5, -11],
     connectsTo: ["moved-here"],
+    videoUrl: "/videos/stayed.mp4",
   },
   {
     id: "moved-here",
@@ -119,6 +141,9 @@ export const moments: Moment[] = [
       "A doorway. A smell you can't recreate. Someone calling your name from another room. This is the bedrock — the first coordinate everything else measures from.",
     position: [0, 0, -18],
     connectsTo: ["job-offer"],
+    videoUrl: "/videos/doorway.mp4",
+    videoPrompt:
+      "Childhood hallway, warm afternoon dust in sunbeams, door at the end slightly open, nostalgic slow pan",
   },
   {
     id: "job-offer-alt",

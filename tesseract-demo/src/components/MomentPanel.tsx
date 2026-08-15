@@ -1,4 +1,5 @@
 import { momentMap, getConnectedMoments } from "../data/moments";
+import { MomentVideoPreview } from "./MomentVideoPreview";
 import type { Moment, ViewMode } from "../types";
 
 interface MomentPanelProps {
@@ -47,7 +48,7 @@ export function MomentPanel({
           <ul>
             <li>Drag to orbit · scroll to zoom</li>
             <li>Click a glowing frame to enter a moment</li>
-            <li>Toggle <strong>What if</strong> to reveal branches</li>
+            <li>Toggle <strong>What if</strong> to crossfade portal videos</li>
             <li>Deeper on the grid = further in the past</li>
             <li>Side corridors = paths you didn&apos;t take</li>
           </ul>
@@ -87,6 +88,8 @@ function MomentDetail({
       {moment.isPresent && <span className="badge present">You are here</span>}
       {moment.isFork && <span className="badge fork">Fork point</span>}
       {isBranch && <span className="badge branch">Alternate path</span>}
+
+      <MomentVideoPreview moment={moment} viewMode={viewMode} />
 
       <p className="reality">{moment.reality}</p>
 

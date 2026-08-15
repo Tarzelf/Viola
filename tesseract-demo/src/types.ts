@@ -22,6 +22,14 @@ export interface Moment {
   branchIds?: string[];
   isFork?: boolean;
   isPresent?: boolean;
+  /** Looping clip for what happened — Grok-generated or personal footage. */
+  videoUrl?: string;
+  /** Crossfades in when toggling What if on fork moments. */
+  alternateVideoUrl?: string;
+  /** Prompt used to generate videoUrl (for Grok pipeline). */
+  videoPrompt?: string;
+  /** Prompt for the alternate branch clip. */
+  alternateVideoPrompt?: string;
 }
 
 export type ViewMode = "reality" | "what-if";

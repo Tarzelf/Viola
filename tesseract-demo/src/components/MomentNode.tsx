@@ -3,6 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import type { Group } from "three";
 import type { Moment } from "../types";
+import { VideoPortal } from "./VideoPortal";
+import { getVideoMixTarget } from "../utils/videoMix";
 
 interface MomentNodeProps {
   moment: Moment;
@@ -34,6 +36,12 @@ export function MomentNode({
 
   const emissive = selected ? 1.2 : hovered ? 0.8 : showBranch ? 0.5 : 0.25;
   const opacity = viewMode === "reality" && isBranch ? 0.15 : 1;
+
+  const mixTarget = getVideoMixTarget(moment, viewMode, selected);
+  const realityUrl = isBranch ? undefined : moment.videoUrl;
+  const alternateUrl = isBranch
+    ? moment.videoUrl
+    : moment.alternateVideoUrl;
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -75,18 +83,14 @@ export function MomentNode({
         />
       </mesh>
 
-      {/* Inner glow plane */}
-      <mesh position={[0, 0, 0.08]}>
-        <planeGeometry args={[2.1, 2.9]} />
-        <meshStandardMaterial
-          color={baseColor}
-          emissive={baseColor}
-          emissiveIntensity={emissive * 0.6}
-          transparent
-          opacity={opacity * 0.2}
-          side={2}
-        />
-      </mesh>
+      <VideoPortal
+        realityUrl={realityUrl}
+        alternateUrl={alternateUrl}
+        mixTarget={mixTarget}
+        opacity={opacity}
+        emissive={emissive}
+        baseColor={baseColor}
+      />
 
       {/* Frame edges */}
       {[
