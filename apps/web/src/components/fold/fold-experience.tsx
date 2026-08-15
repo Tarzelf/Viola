@@ -10,7 +10,7 @@ import {
   type FoldLattice,
   type FoldMode,
 } from '@viola/core';
-import { Wordmark } from '@/components/app-shell';
+import { Wordmark } from '@/components/wordmark';
 import { emit } from '@/lib/client-analytics';
 import { FoldHud } from './fold-hud';
 import { FoldMap } from './fold-map';

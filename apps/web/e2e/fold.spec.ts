@@ -10,4 +10,6 @@ test('the Fold is a public room', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Moments' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Scenarios' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Return' })).toBeVisible();
+  await expect(page.getByText(/12 moments/i)).toBeVisible();
+  await expect(page.locator('canvas')).toBeVisible();
 });

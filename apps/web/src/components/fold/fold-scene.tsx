@@ -93,7 +93,7 @@ function TesseractWire({ lattice, angles }: { lattice: FoldLattice; angles: Fold
 
   return (
     <lineSegments geometry={geometry}>
-      <lineBasicMaterial color={color.viola} transparent opacity={0.22} />
+      <lineBasicMaterial color={color.viola} transparent opacity={0.55} />
     </lineSegments>
   );
 }
@@ -158,7 +158,7 @@ function EnergyFilament({
   return (
     <group>
       <lineSegments geometry={lineGeo}>
-        <lineBasicMaterial color={pathColor} transparent opacity={strong ? 0.55 : 0.16} />
+        <lineBasicMaterial color={pathColor} transparent opacity={strong ? 0.8 : 0.32} />
       </lineSegments>
       <points ref={pulse} geometry={pulseGeo}>
         <pointsMaterial
@@ -189,10 +189,15 @@ function MomentCell({
   dimmed: boolean;
   onSelect: () => void;
 }) {
+  const group = useRef<THREE.Group>(null);
   const texture = useLookTexture(mediaUrl(photoPath));
-  const width = selected ? 0.5 : 0.38;
+  const width = selected ? 0.62 : 0.48;
   const height = width * 1.25;
-  const opacity = dimmed ? 0.22 : selected ? 1 : 0.92;
+  const opacity = dimmed ? 0.28 : selected ? 1 : 0.96;
+
+  useFrame(({ camera }) => {
+    group.current?.lookAt(camera.position);
+  });
   const frame = useMemo(() => {
     const plane = new THREE.PlaneGeometry(width, height);
     const edges = new THREE.EdgesGeometry(plane);
@@ -203,7 +208,11 @@ function MomentCell({
   useEffect(() => () => frame.dispose(), [frame]);
 
   return (
-    <group position={[position[0], position[1], position[2]]}>
+    <group ref={group} position={[position[0], position[1], position[2]]}>
+      <mesh position={[0, 0, -0.012]}>
+        <planeGeometry args={[width + 0.05, height + 0.05]} />
+        <meshBasicMaterial color={color.viola} transparent opacity={selected ? 0.55 : 0.22} />
+      </mesh>
       <mesh
         onClick={(event) => {
           event.stopPropagation();
@@ -219,9 +228,15 @@ function MomentCell({
       >
         <planeGeometry args={[width, height]} />
         {texture ? (
-          <meshBasicMaterial map={texture} toneMapped={false} transparent opacity={opacity} />
+          <meshBasicMaterial
+            map={texture}
+            color="#f4f0ff"
+            toneMapped={false}
+            transparent
+            opacity={opacity}
+          />
         ) : (
-          <meshBasicMaterial color={color.surfaceRaised} transparent opacity={opacity} />
+          <meshBasicMaterial color={color.viola} transparent opacity={dimmed ? 0.2 : 0.45} />
         )}
       </mesh>
       <lineSegments geometry={frame}>
@@ -288,25 +303,21 @@ function useLookTexture(url: string): THREE.Texture | null {
 
   useEffect(() => {
     let cancelled = false;
-    const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
-    loader.load(
-      url,
-      (loaded) => {
-        if (cancelled) {
-          loaded.dispose();
-          return;
-        }
-        loaded.colorSpace = THREE.SRGBColorSpace;
-        loaded.minFilter = THREE.LinearFilter;
-        loaded.needsUpdate = true;
-        setTexture(loaded);
-      },
-      undefined,
-      () => {
-        if (!cancelled) setTexture(null);
-      },
-    );
+    const image = new Image();
+    // Same-origin media (our /api/media routes) must not be fetched CORS-mode.
+    // TextureLoader's default crossOrigin = anonymous 404s those into black slabs.
+    image.onload = () => {
+      if (cancelled) return;
+      const loaded = new THREE.Texture(image);
+      loaded.colorSpace = THREE.SRGBColorSpace;
+      loaded.minFilter = THREE.LinearFilter;
+      loaded.needsUpdate = true;
+      setTexture(loaded);
+    };
+    image.onerror = () => {
+      if (!cancelled) setTexture(null);
+    };
+    image.src = url;
     return () => {
       cancelled = true;
     };

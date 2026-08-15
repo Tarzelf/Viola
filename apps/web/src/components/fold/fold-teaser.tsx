@@ -7,12 +7,12 @@ export function FoldTeaser() {
       href="/fold"
       className="mb-7 flex items-end justify-between gap-4 rounded-[var(--radius-xl)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-5 py-5 transition-colors hover:border-[rgba(124,92,252,0.4)]"
     >
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="label-caps text-[var(--color-text-tertiary)]">The fold</p>
         <h2 className="display mt-1 text-[26px] leading-tight text-white">
           Every look, every path, in one room.
         </h2>
-        <p className="mt-1.5 max-w-md text-[13px] text-[var(--color-text-secondary)]">
+        <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
           Walk the moments. Follow a piece through closets. Find the way back.
         </p>
       </div>

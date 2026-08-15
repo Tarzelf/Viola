@@ -24,14 +24,14 @@ export function FoldCanvas({
 }: FoldCanvasProps) {
   return (
     <Canvas
-      camera={{ position: [0, 0.28, 6.4], fov: 40, near: 0.1, far: 60 }}
+      camera={{ position: [0, 0.2, 4.6], fov: 42, near: 0.1, far: 60 }}
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       style={{ position: 'absolute', inset: 0, touchAction: 'none' }}
       onPointerMissed={() => onSelect(null)}
     >
       <color attach="background" args={[color.ink]} />
-      <fog attach="fog" args={[color.ink, 7.5, 18]} />
+      <fog attach="fog" args={[color.ink, 10, 22]} />
       <ambientLight intensity={0.55} />
       <pointLight position={[2.4, 2.2, 3.2]} intensity={18} color={color.viola} distance={16} />
       <pointLight position={[-3, -1.2, 2]} intensity={8} color={color.orchid} distance={14} />
