@@ -36,7 +36,19 @@ const PRETTY = {
   Hat: 'HAT',
   Belt: 'BELT',
   Scarf: 'SCARF',
+  'Left-shoe': 'SHOES',
+  'Right-shoe': 'SHOES',
 };
+
+/** Left and right shoes are one product. Keep the larger of the pair. */
+function dedupe(list) {
+  const seen = new Map();
+  for (const item of list) {
+    const existing = seen.get(item.label);
+    if (!existing || item.area > existing.area) seen.set(item.label, item);
+  }
+  return [...seen.values()];
+}
 
 const meta = await sharp(SRC).metadata();
 const W = meta.width;
@@ -69,23 +81,97 @@ function applyMask(mask) {
   return rgba;
 }
 
-/** Where a mask sits in the frame, normalised. */
-function bounds(mask) {
-  let minX = W;
-  let minY = H;
-  let maxX = 0;
-  let maxY = 0;
+/**
+ * Where a mask sits in the frame.
+ *
+ * A hard min/max bounding box is wrong here. Segmentation masks carry stray
+ * pixels, and with the subject's feet spread wide the "shoe" box came back
+ * 817px across — nearly the full frame — so the sticker squashed into an
+ * unreadable sliver. Trimming to the range that holds the bulk of the mask
+ * ignores that scatter and boxes the actual object.
+ */
+function largestBlob(mask) {
+  // Two feet in one "shoe" mask are two disjoint clusters, and any box around
+  // both spans the frame. Percentile trimming cannot help — the pixels are
+  // genuinely at both extremes — so isolate the biggest connected region and
+  // box that. Iterative flood fill; a recursive one blows the stack on a
+  // million-pixel mask.
+  const seen = new Uint8Array(W * H);
+  const out = new Uint8Array(W * H);
+  let best = 0;
+
+  for (let start = 0; start < W * H; start++) {
+    if (seen[start] || mask[start] <= 128) continue;
+
+    const stack = [start];
+    const blob = [];
+    seen[start] = 1;
+
+    while (stack.length > 0) {
+      const idx = stack.pop();
+      blob.push(idx);
+      const x = idx % W;
+      const y = (idx - x) / W;
+
+      if (x > 0) { const n = idx - 1; if (!seen[n] && mask[n] > 128) { seen[n] = 1; stack.push(n); } }
+      if (x < W - 1) { const n = idx + 1; if (!seen[n] && mask[n] > 128) { seen[n] = 1; stack.push(n); } }
+      if (y > 0) { const n = idx - W; if (!seen[n] && mask[n] > 128) { seen[n] = 1; stack.push(n); } }
+      if (y < H - 1) { const n = idx + W; if (!seen[n] && mask[n] > 128) { seen[n] = 1; stack.push(n); } }
+    }
+
+    if (blob.length > best) {
+      best = blob.length;
+      out.fill(0);
+      for (const idx of blob) out[idx] = 255;
+    }
+  }
+
+  return best > 0 ? out : null;
+}
+
+function bounds(mask, keep = 0.97) {
+  const colCounts = new Uint32Array(W);
+  const rowCounts = new Uint32Array(H);
+  let total = 0;
+
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       if (mask[y * W + x] > 128) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
+        colCounts[x]++;
+        rowCounts[y]++;
+        total++;
       }
     }
   }
-  return maxX <= minX ? null : { minX, minY, maxX, maxY };
+  if (total === 0) return null;
+
+  const span = (counts, length) => {
+    const drop = (total * (1 - keep)) / 2;
+    let acc = 0;
+    let lo = 0;
+    let hi = length - 1;
+    for (let i = 0; i < length; i++) {
+      acc += counts[i];
+      if (acc >= drop) {
+        lo = i;
+        break;
+      }
+    }
+    acc = 0;
+    for (let i = length - 1; i >= 0; i--) {
+      acc += counts[i];
+      if (acc >= drop) {
+        hi = i;
+        break;
+      }
+    }
+    return [lo, hi];
+  };
+
+  const [minX, maxX] = span(colCounts, W);
+  const [minY, maxY] = span(rowCounts, H);
+
+  return maxX <= minX || maxY <= minY ? null : { minX, minY, maxX, maxY };
 }
 
 const stickers = [];
@@ -93,14 +179,18 @@ const stickers = [];
 for (const segment of segments) {
   if (!GARMENT_LABELS.has(segment.label)) continue;
 
-  const mask = Buffer.from(segment.mask.data);
+  const raw = Buffer.from(segment.mask.data);
+  const mask = largestBlob(raw) ?? raw;
   const box = bounds(mask);
   if (!box) continue;
 
   const width = box.maxX - box.minX;
   const height = box.maxY - box.minY;
-  if (width < 60 || height < 60) {
-    console.log(`${segment.label.padEnd(15)} too small (${width}x${height}), skipped`);
+  // A shoe in a full-body shot is legitimately small — around 90x40 at this
+  // resolution. The earlier 60px floor was arbitrary and threw away real
+  // garments; the guard should only catch specks of mask noise.
+  if (width < 24 || height < 24 || width * height < 1200) {
+    console.log(`${segment.label.padEnd(15)} noise (${width}x${height}), skipped`);
     continue;
   }
 
@@ -157,6 +247,7 @@ for (const segment of segments) {
   stickers.push({
     label,
     buffer: sticker,
+    area: width * height,
     anchor: {
       x: (box.minX + box.maxX) / 2 / W,
       y: (box.minY + box.maxY) / 2 / H,
@@ -188,27 +279,34 @@ const layers = [
   },
 ];
 
-// Stickers alternate sides, sized to the gutter, ordered top to bottom.
-stickers.sort((a, b) => a.anchor.y - b.anchor.y);
+// One entry per product, ordered top to bottom, alternating sides.
+const placed = dedupe(stickers).sort((a, b) => a.anchor.y - b.anchor.y);
 
-const slotW = Math.round(CW * 0.3);
+// Distribute down the usable height rather than a fixed step, so five
+// stickers do not run off the bottom the way a hardcoded stride would.
+const topBand = 0.1;
+const bottomBand = 0.78;
+const slotW = Math.round(CW * 0.27);
 const svgParts = [];
 
-for (const [index, sticker] of stickers.entries()) {
+for (const [index, sticker] of placed.entries()) {
   const side = index % 2 === 0 ? 'left' : 'right';
+  // Upscaling is allowed: a shoe cut from a full-body shot is tiny in source
+  // pixels but still needs to read on the card.
   const resized = await sharp(sticker.buffer)
-    .resize({ width: slotW, height: slotW, fit: 'inside' })
+    .resize({ width: slotW, height: Math.round(CH * 0.15), fit: 'inside', kernel: 'lanczos3' })
     .toBuffer();
   const rm = await sharp(resized).metadata();
 
-  const x = side === 'left' ? Math.round(CW * 0.04) : CW - Math.round(CW * 0.04) - rm.width;
-  const y = Math.round(CH * (0.16 + index * 0.2));
+  const step = placed.length > 1 ? (bottomBand - topBand) / (placed.length - 1) : 0;
+  const x = side === 'left' ? Math.round(CW * 0.035) : CW - Math.round(CW * 0.035) - rm.width;
+  const y = Math.round(CH * (topBand + index * step));
 
   layers.push({ input: resized, left: x, top: y });
 
   svgParts.push(`
-    <text x="${x + rm.width / 2}" y="${y + rm.height + 26}"
-          font-family="sans-serif" font-size="19" font-weight="700"
+    <text x="${x + rm.width / 2}" y="${y + rm.height + 24}"
+          font-family="sans-serif" font-size="18" font-weight="700"
           letter-spacing="3" fill="#ffffff" text-anchor="middle">${sticker.label}</text>`);
 }
 
@@ -232,4 +330,4 @@ await sharp({ create: { width: CW, height: CH, channels: 4, background: { r: 11,
   .png()
   .toFile(OUT);
 
-console.log(`\n${stickers.length} stickers -> ${OUT}`);
+console.log(`\n${placed.length} stickers placed (${stickers.length} regions) -> ${OUT}`);

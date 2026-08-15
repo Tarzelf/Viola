@@ -44,6 +44,46 @@ Background, Hair, Sunglasses, Upper-clothes, Face, Left-arm, Right-arm
 Masking to the clothing labels gives a clean cutout: skin and hair gone,
 garment intact.
 
+## Tested on a proper full-body shot
+
+The first test used a half-body outdoor portrait, which was not representative.
+Re-run on a full-body studio shot — white crop top, striped wide-leg trousers,
+red bag, white sneakers — the model returned:
+
+```
+Hair, Upper-clothes, Pants, Left-shoe, Right-shoe, Face, Left-arm, Right-arm, Bag
+```
+
+Four distinct products, cut cleanly, in 1.8 seconds. `screen.mjs` scores a
+folder of candidate photos by how many garment categories each yields, which is
+a fast way to find a representative test image.
+
+Quality scales with how big the garment is in frame:
+
+| Garment | Source size | Result |
+|---|---|---|
+| Trousers | 721×699 | excellent — the wide-leg shape is unmistakable |
+| Bag | 60×90 | good, clearly readable |
+| Upper layer | 141×123 | usable, some colour bleed at the edge |
+| Shoes | 97×39 | soft; has to be upscaled to read on a card |
+
+### Three bugs worth knowing about
+
+**A hard min/max bounding box is wrong.** With the subject's feet apart, the
+"shoe" mask spans both feet, so the box came back 817px across — nearly the
+whole frame — and the sticker squashed to an unreadable sliver. Fixed by
+isolating the largest connected region per mask, which boxes one actual shoe.
+Percentile trimming was tried first and does not help: the pixels are genuinely
+at both extremes rather than being scatter.
+
+**Flood fill has to be iterative.** A recursive one overflows the stack on a
+million-pixel mask.
+
+**Arbitrary minimum sizes throw away real garments.** A 60px floor discarded
+the shoes, which are legitimately about 90×40 in a full-body shot. The guard
+should only catch specks of mask noise, and small garments need upscaling
+rather than rejection.
+
 ## The catch: granularity
 
 The taxonomy is **category-level, not item-level**. The test photo has a red
