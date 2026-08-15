@@ -58,9 +58,16 @@ export default function FeedScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.color.ink, paddingTop: insets.top }}>
       <View style={{ paddingHorizontal: 16, paddingBottom: 10 }}>
-        <Text style={{ ...typeStyle('displayLg'), color: '#fff' }}>
-          Viola<Text style={{ color: theme.color.violaText }}>.</Text>
-        </Text>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}
+        >
+          <Text style={{ ...typeStyle('displayLg'), color: '#fff' }}>
+            Viola<Text style={{ color: theme.color.violaText }}>.</Text>
+          </Text>
+          <Pressable onPress={() => router.push('/fold')} hitSlop={10}>
+            <Text style={{ ...typeStyle('bodySm'), color: theme.color.violaText }}>Fold</Text>
+          </Pressable>
+        </View>
 
         <View style={{ flexDirection: 'row', gap: 6, marginTop: 12 }}>
           {TABS.map((t) => {

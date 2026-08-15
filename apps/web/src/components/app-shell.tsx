@@ -36,12 +36,21 @@ export function Wordmark({ size = 22 }: { size?: number }) {
 function Header({ handle }: { handle: string | null }) {
   return (
     <header className="sticky top-0 z-[var(--z-header,200)] -mx-4 mb-4 flex items-center justify-between border-b border-[var(--color-hairline)] bg-[rgba(11,10,15,0.72)] px-4 py-3.5 backdrop-blur-xl sm:-mx-6 sm:px-6">
-      <Link href="/" aria-label="Viola home">
-        <Wordmark />
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link href="/" aria-label="Viola home">
+          <Wordmark />
+        </Link>
+        <Link
+          href="/fold"
+          className="text-[12px] font-medium text-[var(--color-text-secondary)] transition-colors hover:text-white sm:hidden"
+        >
+          Fold
+        </Link>
+      </div>
 
       <nav className="hidden items-center gap-1 sm:flex">
         <NavLink href="/">Feed</NavLink>
+        <NavLink href="/fold">Fold</NavLink>
         <NavLink href="/vaults">Vaults</NavLink>
       </nav>
 

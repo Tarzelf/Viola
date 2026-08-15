@@ -16,6 +16,7 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.7.0",
     "@viola/core": "workspace:*",
     "@viola/db": "workspace:*",
     "@viola/design": "workspace:*",
@@ -24,16 +25,18 @@
     "next": "^16.3.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "three": "^0.185.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
+    "@types/three": "^0.185.4",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.3",
-    "vitest": "^4.1.10",
-    "@playwright/test": "^1.62.1",
-    "sharp": "^0.35.3"
+    "vitest": "^4.1.10"
   }
 }

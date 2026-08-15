@@ -21,6 +21,7 @@ const config: NextConfig = {
     '@viola/db',
     '@viola/pipeline',
     '@viola/render',
+    'three',
   ],
 };
 

@@ -97,6 +97,11 @@ export interface EventMap {
   content_reported: BaseProps & { targetType: string; reason: string };
   user_blocked: BaseProps & { targetUserId: string };
   upload_quarantined: BaseProps & { lookId: string; reasons: string[] };
+
+  // --- the Fold ---
+  fold_opened: BaseProps & { momentCount: number; focusSlug?: string };
+  fold_moment_selected: BaseProps & { lookId: string; mode: 'moments' | 'scenarios' | 'return' };
+  fold_return_traced: BaseProps & { lookId: string; pathCount: number };
 }
 
 export type EventName = keyof EventMap;

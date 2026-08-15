@@ -141,6 +141,17 @@ export default async function SharePage({ params, searchParams }: PageProps) {
         score={look.score}
       />
 
+      <Link
+        href={`/fold?focus=${slug}`}
+        className="mt-4 flex items-center justify-between rounded-[var(--radius-lg)] border border-[var(--color-hairline)] bg-[var(--color-surface)] px-4 py-3.5 transition-colors hover:border-[rgba(124,92,252,0.4)]"
+      >
+        <div>
+          <p className="label-caps text-[var(--color-text-tertiary)]">The fold</p>
+          <p className="mt-0.5 text-[14px] text-white">See this moment in the room</p>
+        </div>
+        <span className="text-[13px] font-medium text-[var(--color-viola-text)]">Open</span>
+      </Link>
+
       {look.items.length > 0 && (
         <section className="mt-9">
           <h2 className="label-caps mb-4 text-[var(--color-text-tertiary)]">Shop the look</h2>

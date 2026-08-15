@@ -135,6 +135,15 @@ On sign-up, everything the guest did — blooms, affiliate clicks — is **claim
 onto the new account. Losing it at the moment someone converts would be a strange
 reward for converting.
 
+## The Fold
+
+Looks are five-dimensional (time, vibe, energy, kinship, scenario). The Fold
+projects that into a room you can turn — a tesseract on web, the same lattice
+flattened on iOS and for `prefers-reduced-motion`.
+
+The math lives in `packages/core/src/fold.ts` and is renderer-agnostic. The
+web room is `/fold`; the read model is `GET /api/fold`. See `docs/FOLD.md`.
+
 ## What is gated
 
 The paywall sits only on **accumulation**: vaults, saved items, weekly taggings,

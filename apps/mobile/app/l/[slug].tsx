@@ -193,6 +193,32 @@ export default function LookScreen() {
 
         <ShareRow slug={look.slug} archetype={look.archetypeName} score={look.score} />
 
+        <Pressable
+          onPress={() => router.push(`/fold?focus=${look.slug}`)}
+          style={{
+            marginTop: 14,
+            borderRadius: theme.radius.lg,
+            borderWidth: 1,
+            borderColor: theme.color.hairline,
+            backgroundColor: theme.color.surface,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View>
+            <Text style={{ ...typeStyle('itemLabel'), color: theme.color.textTertiary }}>
+              THE FOLD
+            </Text>
+            <Text style={{ ...typeStyle('bodySm'), color: '#fff', marginTop: 4 }}>
+              See this moment in the room
+            </Text>
+          </View>
+          <Text style={{ ...typeStyle('bodySm'), color: theme.color.violaText }}>Open</Text>
+        </Pressable>
+
         {look.items.length > 0 && (
           <View style={{ marginTop: 32 }}>
             <Text

@@ -82,6 +82,7 @@ Chosen for the persona, and changing any of these touches everything.
 | Folder      | **Vault**                  | Reads as private and worth keeping. A closet is where laundry goes |
 | Rating      | **Viola Score** + **Vibe** | The archetype leads; the number supports                           |
 | Leaderboard | **Top of the Week**        | Top only. There is deliberately no inverse                         |
+| The lattice | **Fold**                   | Every look at once. Moments, scenarios, ways back                  |
 
 ## The anti-comparison thesis
 

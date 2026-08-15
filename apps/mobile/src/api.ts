@@ -1,3 +1,4 @@
+import type { FoldLattice } from '@viola/core';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
@@ -152,6 +153,10 @@ export const api = {
 
   feed(tab: 'for-you' | 'fresh' | 'top' = 'for-you') {
     return request<{ looks: FeedItem[] }>(`/api/feed?tab=${tab}`);
+  },
+
+  fold() {
+    return request<{ lattice: FoldLattice }>('/api/fold');
   },
 
   look(slug: string) {

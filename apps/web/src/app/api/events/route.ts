@@ -18,6 +18,9 @@ const ALLOWED = new Set<string>([
   'look_reveal_played',
   'paywall_shown',
   'vault_save_attempted',
+  'fold_opened',
+  'fold_moment_selected',
+  'fold_return_traced',
 ]);
 
 export async function POST(request: Request) {

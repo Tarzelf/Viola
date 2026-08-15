@@ -34,6 +34,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="l/[slug]" />
+        <Stack.Screen name="fold" />
         <Stack.Screen
           name="new"
           options={{ presentation: 'modal', animation: 'slide_from_bottom' }}

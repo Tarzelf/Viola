@@ -7,6 +7,7 @@ import { SponsoredCard } from '@/components/sponsored-card';
 import { getViewer } from '@/lib/identity';
 import { FeedCard } from '@/components/look-card';
 import { LookSlider } from '@/components/look-slider';
+import { FoldTeaser } from '@/components/fold/fold-teaser';
 import { AppShell } from '@/components/app-shell';
 
 export const dynamic = 'force-dynamic';
@@ -74,6 +75,8 @@ export default async function FeedPage({
           );
         })}
       </div>
+
+      <FoldTeaser />
 
       {featured.length > 0 && <LookSlider looks={featured} title="This week" />}
 

@@ -9,6 +9,9 @@ to fire into Messages.
 
 Web app (Next.js) + iOS app (Expo), one shared TypeScript core.
 
+The **Fold** is the other way to see a look: every moment and every path,
+folded into one room. Open `/fold`, or tap through from any look.
+
 ---
 
 ## Quick start
