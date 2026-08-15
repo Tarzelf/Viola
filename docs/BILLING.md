@@ -37,7 +37,17 @@ EXPO_PUBLIC_SUPERWALL_API_KEY=pk_...
 The mobile Plus screen calls `registerPlacement({ placement: "campaign_trigger" })`.
 Never link to Whop/web checkout from the iOS app (Guideline 3.1.1).
 
-## Local development
+## Whop branding
+
+| Asset | Status |
+|---|---|
+| Logo | Set (`file_weB9YY450S93N`) |
+| Banner | Set (`file_vBZaFkgGhUvfw`) |
+| Open Graph | Set (banner) |
+| Store accent | `violet` · featured · business |
+| Route | `biz_C5RaxuzjBv7KDk` (vanity `viola` / `viola-app` taken) |
+
+Dashboard: https://whop.com/dashboard/biz_C5RaxuzjBv7KDk/settings/?editBusiness=true
 
 Without `WHOP_API_KEY` and outside production, `/api/billing/dev-upgrade` still
 grants Plus for offline testing. Public Whop plan URLs also work without an API key.
