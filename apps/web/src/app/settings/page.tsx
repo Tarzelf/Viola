@@ -45,6 +45,16 @@ export default async function SettingsPage() {
         </section>
 
         <section className="surface mt-4 px-5 py-5">
+          <p className="label-caps text-[var(--color-text-tertiary)]">Creator</p>
+          <Link
+            href="/earnings"
+            className="mt-2 block text-[14px] text-[var(--color-viola-text)] hover:underline"
+          >
+            Earnings dashboard
+          </Link>
+        </section>
+
+        <section className="surface mt-4 px-5 py-5">
           <p className="label-caps text-[var(--color-text-tertiary)]">Your data</p>
           <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
             Location data is stripped from every photo before it is stored. We never keep raw IP

@@ -210,12 +210,18 @@ export async function getEarnings(
 }
 
 /** Which looks actually drive revenue. */
-export async function topEarningLooks(db: Database, limit = 10) {
-  return db
+export async function topEarningLooks(
+  db: Database,
+  options: { limit?: number; userId?: string } = {},
+) {
+  const limit = options.limit ?? 10;
+  const rows = await db
     .select({
       lookId: schema.affiliateClicks.lookId,
       slug: schema.looks.slug,
       handle: schema.profiles.handle,
+      photoPath: schema.looks.photoPath,
+      lookUserId: schema.looks.userId,
       clicks: sql<number>`count(distinct ${schema.affiliateClicks.id})::int`,
       commissionCents: sql<number>`coalesce(sum(${schema.affiliateTransactions.commissionCents}), 0)::int`,
     })
@@ -226,7 +232,19 @@ export async function topEarningLooks(db: Database, limit = 10) {
     )
     .leftJoin(schema.looks, eq(schema.looks.id, schema.affiliateClicks.lookId))
     .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.looks.userId))
-    .groupBy(schema.affiliateClicks.lookId, schema.looks.slug, schema.profiles.handle)
+    .groupBy(
+      schema.affiliateClicks.lookId,
+      schema.looks.slug,
+      schema.profiles.handle,
+      schema.looks.photoPath,
+      schema.looks.userId,
+    )
     .orderBy(desc(sql`coalesce(sum(${schema.affiliateTransactions.commissionCents}), 0)`))
-    .limit(limit);
+    .limit(options.userId ? limit * 4 : limit);
+
+  const filtered = options.userId
+    ? rows.filter((r) => r.lookUserId === options.userId).slice(0, limit)
+    : rows;
+
+  return filtered.map(({ lookUserId: _uid, ...rest }) => rest);
 }

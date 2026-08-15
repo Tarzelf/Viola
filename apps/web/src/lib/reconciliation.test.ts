@@ -240,7 +240,7 @@ describe('earnings', () => {
 
   it('ranks the looks that actually drive revenue', async () => {
     await seedRevenue();
-    const top = await topEarningLooks(db(), 5);
+    const top = await topEarningLooks(db(), { limit: 5 });
 
     expect(top.length).toBeGreaterThan(0);
     expect(Number(top[0]!.commissionCents)).toBeGreaterThanOrEqual(

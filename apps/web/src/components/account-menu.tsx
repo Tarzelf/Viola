@@ -58,6 +58,13 @@ export function AccountMenu({ handle }: { handle: string }) {
               Vaults
             </Link>
             <Link
+              href="/earnings"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-[14px] text-white transition-colors hover:bg-white/5"
+            >
+              Earnings
+            </Link>
+            <Link
               href="/settings"
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 text-[14px] text-white transition-colors hover:bg-white/5"

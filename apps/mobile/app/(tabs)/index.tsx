@@ -4,6 +4,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api, type FeedItem } from '@/api';
 import { FeedCard } from '@/components/look-card';
+import { LookSlider } from '@/components/look-slider';
 import { BloomButton } from '@/components/bloom-button';
 import { formatCount } from '@/format';
 import { theme, typeStyle } from '@/theme';
@@ -23,6 +24,7 @@ export default function FeedScreen() {
 
   const [tab, setTab] = useState<Tab>('for-you');
   const [looks, setLooks] = useState<FeedItem[]>([]);
+  const [featured, setFeatured] = useState<FeedItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +33,12 @@ export default function FeedScreen() {
       setError(null);
       const result = await api.feed(which);
       setLooks(result.looks);
+      if (which === 'for-you') {
+        const top = await api.feed('top');
+        setFeatured(top.looks.slice(0, 8));
+      } else {
+        setFeatured([]);
+      }
     } catch {
       // Surfaced rather than swallowed: a silent empty feed is
       // indistinguishable from "nobody has posted", which is a much worse
@@ -89,8 +97,15 @@ export default function FeedScreen() {
       <FlatList
         data={looks}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 26 }}
+        contentContainerStyle={{ paddingBottom: 32, gap: 26 }}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          featured.length > 0 ? (
+            <LookSlider looks={featured} onOpen={(slug) => router.push(`/l/${slug}`)} />
+          ) : (
+            <View style={{ height: 0 }} />
+          )
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -103,7 +118,7 @@ export default function FeedScreen() {
           />
         }
         ListEmptyComponent={
-          <View style={{ paddingTop: 80, alignItems: 'center' }}>
+          <View style={{ paddingTop: 80, alignItems: 'center', paddingHorizontal: 16 }}>
             <Text style={{ ...typeStyle('displayMd'), color: '#fff' }}>
               {error ? 'Nothing loaded' : 'Nothing here yet'}
             </Text>
@@ -121,7 +136,7 @@ export default function FeedScreen() {
           </View>
         }
         renderItem={({ item }) => (
-          <View>
+          <View style={{ paddingHorizontal: 16 }}>
             <FeedCard
               look={item}
               width={cardWidth}

@@ -224,9 +224,13 @@ export interface VaultContents {
     brand: string | null;
     title: string | null;
     priceCents: number | null;
+    currency: string | null;
     imagePath: string | null;
     merchantUrl: string | null;
     lookItemId: string | null;
+    lookHandle: string | null;
+    lookScore: number | null;
+    lookArchetypeId: string | null;
   }>;
 }
 
@@ -250,6 +254,9 @@ export async function getVault(
       id: schema.vaultItems.id,
       lookSlug: schema.looks.slug,
       photoPath: schema.looks.photoPath,
+      lookScore: schema.looks.score,
+      lookArchetypeId: schema.looks.archetypeId,
+      lookHandle: schema.profiles.handle,
       brand: schema.lookItems.brand,
       itemTitle: schema.lookItems.title,
       subtype: schema.lookItems.subtype,
@@ -257,11 +264,13 @@ export async function getVault(
       productTitle: schema.products.title,
       productBrand: schema.products.brand,
       priceCents: schema.products.priceCents,
+      currency: schema.products.currency,
       imagePath: schema.products.imagePath,
       merchantUrl: schema.products.merchantUrl,
     })
     .from(schema.vaultItems)
     .leftJoin(schema.looks, eq(schema.looks.id, schema.vaultItems.lookId))
+    .leftJoin(schema.profiles, eq(schema.profiles.userId, schema.looks.userId))
     .leftJoin(schema.lookItems, eq(schema.lookItems.id, schema.vaultItems.lookItemId))
     .leftJoin(
       schema.products,
@@ -279,9 +288,13 @@ export async function getVault(
       brand: i.brand ?? i.productBrand,
       title: i.itemTitle ?? i.productTitle ?? i.subtype,
       priceCents: i.priceCents,
+      currency: i.currency,
       imagePath: i.imagePath,
       merchantUrl: i.merchantUrl,
       lookItemId: i.lookItemId,
+      lookHandle: i.lookHandle,
+      lookScore: i.lookScore,
+      lookArchetypeId: i.lookArchetypeId,
     })),
   };
 }

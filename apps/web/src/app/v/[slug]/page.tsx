@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { formatPrice } from '@viola/core';
+import { getArchetype } from '@viola/core';
 import { AppShell } from '@/components/app-shell';
+import { VaultLookbook } from '@/components/vault-lookbook';
 import { getViewer } from '@/lib/identity';
-import { mediaUrl } from '@/lib/media';
 import { db } from '@/lib/db';
 import { getVault } from '@/lib/vaults';
 
@@ -22,6 +22,24 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
   const contents = await getVault(await db(), slug, viewer.userId);
 
   if (!contents) notFound();
+
+  const items = contents.items.map((item) => ({
+    id: item.id,
+    lookItemId: item.lookItemId,
+    brand: item.brand,
+    title: item.title,
+    priceCents: item.priceCents,
+    currency: item.currency,
+    imagePath: item.imagePath,
+    photoPath: item.photoPath,
+    merchantUrl: item.merchantUrl,
+    lookSlug: item.lookSlug,
+    lookHandle: item.lookHandle,
+    lookScore: item.lookScore,
+    lookArchetype: item.lookArchetypeId
+      ? (getArchetype(item.lookArchetypeId)?.name ?? null)
+      : null,
+  }));
 
   return (
     <AppShell>
@@ -46,53 +64,7 @@ export default async function VaultPage({ params }: { params: Promise<{ slug: st
           </p>
         </div>
       ) : (
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {contents.items.map((item) => (
-            <li
-              key={item.id}
-              className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-hairline)] bg-[var(--color-surface)]"
-            >
-              <div className="relative flex aspect-square items-center justify-center bg-white/[0.03]">
-                {item.imagePath ? (
-                  <img
-                    src={mediaUrl(item.imagePath)}
-                    alt=""
-                    className="h-[70%] w-[70%] object-contain"
-                  />
-                ) : item.photoPath ? (
-                  <img
-                    src={mediaUrl(item.photoPath)}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-3 w-3 rounded-full bg-white/15" />
-                )}
-              </div>
-              <div className="p-3">
-                {item.brand && <p className="label-caps truncate text-white">{item.brand}</p>}
-                <p className="label-caps-sub truncate">{item.title}</p>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  {item.priceCents != null && (
-                    <span className="stat text-[13px] text-white">
-                      {formatPrice(item.priceCents)}
-                    </span>
-                  )}
-                  {item.lookItemId && item.merchantUrl && (
-                    <a
-                      href={`/go/${item.lookItemId}`}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow sponsored"
-                      className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-[var(--color-ink)]"
-                    >
-                      Shop
-                    </a>
-                  )}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <VaultLookbook vaultName={contents.vault.name} items={items} />
       )}
     </AppShell>
   );

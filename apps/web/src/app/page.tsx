@@ -6,6 +6,7 @@ import { showsSponsored } from '@/lib/entitlements';
 import { SponsoredCard } from '@/components/sponsored-card';
 import { getViewer } from '@/lib/identity';
 import { FeedCard } from '@/components/look-card';
+import { LookSlider } from '@/components/look-slider';
 import { AppShell } from '@/components/app-shell';
 
 export const dynamic = 'force-dynamic';
@@ -25,11 +26,23 @@ export default async function FeedPage({
   const tab = (TABS.find((t) => t.id === params.tab)?.id ?? 'for-you') as FeedTab;
   const viewer = await getViewer();
 
-  const looks = await getFeed({
-    tab,
-    viewerUserId: viewer.userId,
-    viewerGuestId: viewer.guestId,
-  });
+  const [looks, featured] = await Promise.all([
+    getFeed({
+      tab,
+      viewerUserId: viewer.userId,
+      viewerGuestId: viewer.guestId,
+    }),
+    // Featured runway only on For you — Top of the week already IS that list,
+    // and Fresh should feel chronological, not curated.
+    tab === 'for-you'
+      ? getFeed({
+          tab: 'top',
+          limit: 8,
+          viewerUserId: viewer.userId,
+          viewerGuestId: viewer.guestId,
+        })
+      : Promise.resolve([]),
+  ]);
 
   // Free accounts and signed-out visitors see sponsored placements; Plus does
   // not. The entitlement is applied at the query, not at the render site.
@@ -61,6 +74,8 @@ export default async function FeedPage({
           );
         })}
       </div>
+
+      {featured.length > 0 && <LookSlider looks={featured} title="This week" />}
 
       {looks.length === 0 ? (
         <EmptyFeed />
