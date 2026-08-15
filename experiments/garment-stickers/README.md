@@ -84,6 +84,56 @@ the shoes, which are legitimately about 90×40 in a full-body shot. The guard
 should only catch specks of mask noise, and small garments need upscaling
 rather than rejection.
 
+## Why the first version looked cheap, and what fixed it
+
+`sticker-v2.mjs` is a rewrite of the rendering. The originals looked bad for
+four specific reasons, all fixed:
+
+1. **The mask is hard binary 0/255**, so every edge was a jagged staircase.
+   Now blurred and re-curved into a 1-2px antialiased edge.
+2. **No erosion**, so a rim of background came along for the ride — the white
+   crop top had a green halo from the wall behind it. The curve now sits above
+   the midpoint, which pulls the boundary inward.
+3. **The keyline was sized from SOURCE pixels.** A 721px garment got a thick
+   outline, a 97px one got a hairline, and on the card — where both end up the
+   same size — they looked like they came from different apps. Stickers are now
+   normalised to a common size BEFORE the keyline is drawn, which is the only
+   way to get consistency.
+4. **Garments running off the frame** ended in a dead-straight mask edge, and
+   the keyline traced it. Those are now detected and reported as `clipped`.
+
+### Two sharp traps, both silent
+
+Neither of these errors — they just produce a fully transparent sticker:
+
+- **`.raw()` is mandatory.** Without it sharp encodes a PNG and the "mask
+  values" read afterwards are file headers.
+- **`blur()` promotes a 1-channel image to 3.** The buffer comes back three
+  times the expected length, so every index into it is wrong. Force
+  `.toColourspace('b-w')` before `.raw()`.
+
+## It degrades with photo quality, and small items go first
+
+`degrade.mjs` simulates phone-selfie conditions from a studio shot: 55%
+resolution, dimmed and desaturated for indoor light, lifted blacks, slight
+handshake blur, sensor noise and aggressive JPEG.
+
+| Garment | Studio | Phone conditions |
+|---|---|---|
+| Trousers | excellent | still good — large garments are robust |
+| Bag | clean silhouette | silhouette breaks, gains a false notch |
+| Upper layer | usable | mushy |
+| Shoes | soft | barely recognisable |
+
+The pattern is consistent: **the smaller the garment sits in frame, the sooner
+it falls apart.** Shoes are the first casualty and also one of the most
+shoppable categories in fashion, which is an awkward combination.
+
+Worth being explicit that this is still a *simulation*. It reproduces
+resolution, noise and lighting, but not a cluttered bedroom, a phone visible in
+the mirror, or an awkward angle. A genuine amateur mirror selfie will be
+harder than this.
+
 ## The catch: granularity
 
 The taxonomy is **category-level, not item-level**. The test photo has a red
