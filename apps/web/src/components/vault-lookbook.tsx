@@ -96,7 +96,7 @@ export function VaultLookbook({
               onClick={() => {
                 if (lookEntries.length > 0) setGalleryOpen(true);
               }}
-              className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-[rgba(255,255,255,0.03)] sm:aspect-[5/4]"
+              className="relative flex aspect-[4/3] max-h-[min(56vh,520px)] w-full items-center justify-center overflow-hidden bg-[rgba(255,255,255,0.03)]"
               aria-label={
                 lookEntries.length > 0 ? 'Open lookbook gallery' : (current.title ?? vaultName)
               }
