@@ -102,3 +102,8 @@ to look. It matters more than it sounds for an app this dark.
 - Sign in with Apple is a dependency but not yet a button. Apple requires it
   once any other social login exists — currently there is only email, so this is
   not yet blocking.
+
+## Also see
+
+- [LAUNCH.md](./LAUNCH.md) — soft launch → TestFlight → store
+- [APPSTORE.md](./APPSTORE.md) — review questionnaire answers and listing copy

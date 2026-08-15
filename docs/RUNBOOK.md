@@ -130,3 +130,7 @@ Roughly **$0.027 per look** — one vision call plus a few product searches. Wat
 
 If per-look cost is not falling as the catalogue warms up, query normalisation
 has probably regressed and the cache is missing.
+
+## Launch
+
+See [LAUNCH.md](./LAUNCH.md) and [APPSTORE.md](./APPSTORE.md) for the ordered path to production and App Review.
