@@ -1,0 +1,339 @@
+/* transitions.dev recipes used by Viola — curated subset.
+ *
+ * Source: .agents/skills/transitions-dev (Jakubantalik/transitions.dev).
+ * Only the moments that touch the viral loop are installed: reveal,
+ * score, bloom, account menu, gallery modal. Everything else stays on
+ * Viola's own motion tokens so chrome never becomes louder than content.
+ */
+
+:root {
+  /* Shared motion-token scale (transitions.dev) */
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --td-duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --td-duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --distance-base: 8px;
+  --distance-medium: 12px;
+  --blur-small: 2px;
+  --blur-medium: 3px;
+  --scale-large: 0.96;
+  --scale-medium: 0.97;
+  --scale-tiny: 0.99;
+
+  /* Number pop-in — score digits */
+  --digit-dur: 500ms;
+  --digit-distance: 8px;
+  --digit-stagger: 70ms;
+  --digit-blur: 2px;
+  --digit-ease: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --digit-dir-x: 0;
+  --digit-dir-y: 1;
+
+  /* Texts reveal — processing / empty states */
+  --stagger-dur: 500ms;
+  --stagger-distance: 12px;
+  --stagger-stagger: 40ms;
+  --stagger-blur: 3px;
+  --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Like / Bloom — brand violet, not the library's pink */
+  --like-color: var(--color-viola);
+  --like-fill: 150ms;
+  --like-pop: 350ms;
+  --like-pop-ease: cubic-bezier(0.34, 1.96, 0.64, 1);
+  --like-particle-dur: 600ms;
+  --like-particle-dist: 20px;
+  --like-particle-size: 2.5px;
+  --like-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Menu dropdown */
+  --dropdown-open-dur: 250ms;
+  --dropdown-close-dur: 150ms;
+  --dropdown-pre-scale: 0.97;
+  --dropdown-closing-scale: 0.99;
+  --dropdown-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Modal (gallery) */
+  --modal-open-dur: 250ms;
+  --modal-close-dur: 150ms;
+  --modal-scale: 0.96;
+  --modal-scale-close: 0.96;
+  --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Shimmer (processing status) */
+  --shimmer-dur: 2000ms;
+  --shimmer-base: rgba(251, 249, 251, 0.35);
+  --shimmer-highlight: rgba(251, 249, 251, 0.95);
+  --shimmer-band: 400%;
+  --shimmer-ease: linear;
+}
+
+/* ── Number pop-in ─────────────────────────────────────────────── */
+
+@keyframes t-digit-pop-in {
+  0% {
+    transform: translate(
+      calc(var(--digit-distance) * var(--digit-dir-x)),
+      calc(var(--digit-distance) * var(--digit-dir-y))
+    );
+    opacity: 0;
+    filter: blur(var(--digit-blur));
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.t-digit-group {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.t-digit {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+.t-digit-group.is-animating .t-digit {
+  animation: t-digit-pop-in var(--digit-dur) var(--digit-ease) both;
+}
+
+.t-digit-group.is-animating .t-digit[data-stagger='1'] {
+  animation-delay: var(--digit-stagger);
+}
+
+.t-digit-group.is-animating .t-digit[data-stagger='2'] {
+  animation-delay: calc(var(--digit-stagger) * 2);
+}
+
+/* ── Texts reveal ──────────────────────────────────────────────── */
+
+.t-stagger-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(var(--stagger-distance));
+  filter: blur(var(--stagger-blur));
+  transition:
+    opacity var(--stagger-dur) var(--stagger-ease),
+    transform var(--stagger-dur) var(--stagger-ease),
+    filter var(--stagger-dur) var(--stagger-ease);
+  will-change: transform, opacity, filter;
+}
+
+.t-stagger-line--2 {
+  transition-delay: var(--stagger-stagger);
+}
+
+.t-stagger.is-shown .t-stagger-line {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ── Shimmer text ──────────────────────────────────────────────── */
+
+.t-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--shimmer-base) 0%,
+    var(--shimmer-highlight) 45%,
+    var(--shimmer-base) 90%
+  );
+  background-size: var(--shimmer-band) 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: t-shimmer-sweep var(--shimmer-dur) var(--shimmer-ease) infinite;
+}
+
+@keyframes t-shimmer-sweep {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* ── Like / Bloom ──────────────────────────────────────────────── */
+
+.t-like-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-like[data-liked='true'] .t-like-icon {
+  animation: t-like-pop var(--like-pop) var(--like-pop-ease);
+}
+
+@keyframes t-like-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.82);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.t-like-particles {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  color: var(--like-color);
+}
+
+.t-like-particles i {
+  position: absolute;
+  left: calc(var(--like-particle-size) * var(--psize, 1) / -2);
+  top: calc(var(--like-particle-size) * var(--psize, 1) / -2);
+  width: calc(var(--like-particle-size) * var(--psize, 1));
+  height: calc(var(--like-particle-size) * var(--psize, 1));
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+
+@keyframes t-like-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--px) * 0.25), calc(var(--py) * 0.25)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--px), var(--py)) scale(var(--p-end-scale, 0.6));
+  }
+}
+
+.t-like.is-bursting .t-like-particles i {
+  animation: t-like-burst var(--pdur, var(--like-particle-dur)) ease-out var(--pdelay, 0ms) forwards;
+}
+
+/* ── Menu dropdown ─────────────────────────────────────────────── */
+
+.t-dropdown {
+  transform-origin: top right;
+  transform: scale(var(--dropdown-pre-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dropdown-open-dur) var(--dropdown-ease),
+    opacity var(--dropdown-open-dur) var(--dropdown-ease);
+  will-change: transform, opacity;
+}
+
+.t-dropdown[data-origin='top-right'] {
+  transform-origin: top right;
+}
+
+.t-dropdown.is-open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.t-dropdown.is-closing {
+  transform: scale(var(--dropdown-closing-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dropdown-close-dur) var(--dropdown-ease),
+    opacity var(--dropdown-close-dur) var(--dropdown-ease);
+}
+
+/* ── Modal ─────────────────────────────────────────────────────── */
+
+.t-modal {
+  transform-origin: center;
+  transform: scale(var(--modal-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--modal-open-dur) var(--modal-ease),
+    opacity var(--modal-open-dur) var(--modal-ease);
+  will-change: transform, opacity;
+}
+
+.t-modal.is-open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.t-modal.is-closing {
+  transform: scale(var(--modal-scale-close));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--modal-close-dur) var(--modal-ease),
+    opacity var(--modal-close-dur) var(--modal-ease);
+}
+
+/* Error shake — transitions.dev error-state-shake, simplified */
+@keyframes t-shake-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(calc(var(--distance-small, 6px) * -1));
+  }
+  40% {
+    transform: translateX(var(--distance-small, 6px));
+  }
+  60% {
+    transform: translateX(calc(var(--distance-base, 8px) * -1));
+  }
+  80% {
+    transform: translateX(var(--distance-base, 8px));
+  }
+}
+
+.t-shake {
+  animation: t-shake-x 320ms var(--ease-smooth-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-digit-group .t-digit,
+  .t-like-icon,
+  .t-like-particles i,
+  .t-shimmer,
+  .t-shake {
+    animation: none !important;
+  }
+
+  .t-stagger-line,
+  .t-dropdown,
+  .t-modal {
+    transition: none !important;
+  }
+
+  .t-stagger-line {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .t-dropdown.is-open,
+  .t-modal.is-open {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,204 @@
+@import 'tailwindcss';
+@import '@viola/design/theme.css';
+@import './transitions.css';
+
+/*
+ * Fonts are served from /fonts, vendored in the render package and copied to
+ * public/ so the web app and the server-side card renderer use byte-identical
+ * faces. A share card that does not match the page it came from is a subtle but
+ * corrosive inconsistency.
+ */
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('/fonts/Geist-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('/fonts/Geist-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('/fonts/Geist-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Sans';
+  src: url('/fonts/Geist-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Medium.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-text-primary);
+    font-family: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    /* A single wash of the accent behind everything. Barely perceptible on its
+       own, but it is what stops a near-black canvas reading as flat grey. */
+    background-image:
+      radial-gradient(1100px 620px at 12% -12%, rgba(124, 92, 252, 0.16), transparent 62%),
+      radial-gradient(900px 520px at 92% 4%, rgba(233, 169, 255, 0.09), transparent 58%);
+    background-attachment: fixed;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: var(--color-viola);
+    color: white;
+  }
+
+  /* Focus is always visible and always the accent — never removed. */
+  :focus-visible {
+    outline: 2px solid var(--color-viola);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Respect people who have asked for less movement. The reveal choreography
+     is the most motion-heavy thing here, so this matters more than usual. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* The signature label treatment from the reference: small, heavy, and very
+     widely tracked. Used on every item label across the product. */
+  .label-caps {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .label-caps-sub {
+    font-size: 11px;
+    line-height: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  .hairline {
+    border: 1px solid var(--color-hairline);
+  }
+
+  .surface {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-xl);
+  }
+
+  .display {
+    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .stat {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes viola-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--distance-medium, 12px)) scale(0.97);
+    filter: blur(var(--blur-medium, 3px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes viola-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes viola-petal {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.4) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9) translateY(-26px);
+  }
+}
+
+.animate-rise {
+  animation: viola-rise var(--duration-reveal) var(--ease-gentle) both;
+}
+
+.animate-pop {
+  animation: viola-pop var(--duration-normal) var(--ease-bouncy) both;
+}
+
+@keyframes viola-scan {
+  0% {
+    transform: translateY(-40%);
+  }
+  100% {
+    transform: translateY(300%);
+  }
+}
