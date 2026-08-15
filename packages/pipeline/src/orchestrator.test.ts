@@ -298,3 +298,67 @@ describe('ordering', () => {
     }
   });
 });
+
+describe('manual mode', () => {
+  it('skips product lookup entirely, saving ~94% of the per-look cost', async () => {
+    // Product search is roughly $0.025 of the ~$0.027 a look costs. Deferring
+    // it to the person who actually wore the clothes is both cheaper and more
+    // accurate than any model.
+    const products = new MockProductSearchProvider();
+
+    const result = await runPipeline({
+      lookId: 'manual',
+      image: photo,
+      providers: mockProviders({ products }),
+      cache: new MemoryProductCache(),
+      skipProductSearch: true,
+      fetchImpl,
+    });
+
+    expect(products.calls).toHaveLength(0);
+    expect(result.items.every((i) => i.product === null)).toBe(true);
+    expect(result.items.every((i) => i.resolutionNote?.includes('awaiting a link'))).toBe(true);
+  });
+
+  it('still detects, scores and lays out the garments', async () => {
+    // Only the "where to buy" step is deferred. The look itself is complete.
+    const result = await runPipeline({
+      lookId: 'manual-2',
+      image: photo,
+      providers: mockProviders(),
+      skipProductSearch: true,
+      fetchImpl,
+    });
+
+    expect(result.items.length).toBeGreaterThan(0);
+    expect(result.score.overall).toBeGreaterThanOrEqual(SCORE_FLOOR);
+    expect(result.archetypeId).toBeTruthy();
+    expect(result.layout.slots.length).toBeGreaterThan(0);
+  });
+
+  it('still uses anything the community already identified', async () => {
+    // Manual mode should not make somebody re-type an item another user has
+    // already contributed — the cache is free to read.
+    const products = new MockProductSearchProvider();
+    const cache = new MemoryProductCache();
+    const providers = mockProviders({ products });
+
+    // Someone resolves it normally first.
+    await runPipeline({ lookId: 'seeded', image: photo, providers, cache, fetchImpl });
+    const searchesAfterSeeding = products.calls.length;
+    expect(searchesAfterSeeding).toBeGreaterThan(0);
+
+    // A later manual-mode look picks it up for free.
+    const result = await runPipeline({
+      lookId: 'manual-3',
+      image: photo,
+      providers,
+      cache,
+      skipProductSearch: true,
+      fetchImpl,
+    });
+
+    expect(products.calls.length).toBe(searchesAfterSeeding);
+    expect(result.items.some((i) => i.product !== null)).toBe(true);
+  });
+});

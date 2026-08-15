@@ -8,6 +8,7 @@ import { mediaUrl } from '@/lib/media';
 import { LookCard } from '@/components/look-card';
 import { BloomButton } from '@/components/bloom-button';
 import { formatCount } from '@/lib/format';
+import { IdentifyItem } from '@/components/identify-item';
 import { SaveButton } from '@/components/save-button';
 import { ShareRow } from '@/components/share-row';
 import { ViewPing } from '@/components/view-ping';
@@ -145,7 +146,12 @@ export default async function SharePage({ params, searchParams }: PageProps) {
           <h2 className="label-caps mb-4 text-[var(--color-text-tertiary)]">Shop the look</h2>
           <ul className="flex flex-col gap-2.5">
             {look.items.map((item) => (
-              <ShopRow key={item.id} item={item} lookSlug={slug} />
+              <ShopRow
+                key={item.id}
+                item={item}
+                lookSlug={slug}
+                isOwner={viewer.userId === look.userId}
+              />
             ))}
           </ul>
         </section>
@@ -171,7 +177,9 @@ export default async function SharePage({ params, searchParams }: PageProps) {
 function ShopRow({
   item,
   lookSlug,
+  isOwner,
 }: {
+  isOwner: boolean;
   item: Awaited<ReturnType<typeof getLookBySlug>> extends infer T
     ? T extends { items: Array<infer I> }
       ? I
@@ -229,6 +237,20 @@ function ShopRow({
           <SaveButton lookItemId={item.id} label="Save" compact />
         </div>
       </div>
+
+      {/* The person who wore it knows what it is. Asking them is free, more
+          accurate than a model, and seeds the shared product cache. */}
+      {isOwner && (
+        <div className="mt-1.5 pl-[68px]">
+          <IdentifyItem
+            slug={lookSlug}
+            itemId={item.id}
+            initialBrand={item.brand}
+            initialTitle={item.title}
+            hasLink={shoppable}
+          />
+        </div>
+      )}
     </li>
   );
 }

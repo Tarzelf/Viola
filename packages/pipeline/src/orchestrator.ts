@@ -117,6 +117,16 @@ export interface RunPipelineInput {
   cache?: ProductCache;
   /** Cap on product searches for one look. Cost control. */
   maxResolutions?: number;
+  /**
+   * Skip product lookup entirely and let the poster fill in the links.
+   *
+   * Product search is roughly 94% of the per-look cost — about $0.025 against
+   * $0.0016 for vision — so this is the difference between a look costing
+   * real money and costing almost nothing. Garments are still detected,
+   * scored and laid out; only the "where to buy" step is deferred to a human
+   * who, being the person wearing it, knows the answer anyway.
+   */
+  skipProductSearch?: boolean;
   hint?: string;
   /** Injectable so cutout fetching can be tested without the network. */
   fetchImpl?: typeof fetch;
@@ -136,6 +146,7 @@ export async function runPipeline(input: RunPipelineInput): Promise<PipelineResu
     providers,
     cache,
     maxResolutions = 6,
+    skipProductSearch = false,
     hint,
     fetchImpl = fetch,
     onStage,
@@ -242,8 +253,9 @@ export async function runPipeline(input: RunPipelineInput): Promise<PipelineResu
         secondhand: [],
       };
 
-      // Cache first. A viral sneaker is resolved once for everyone, not once
-      // per look — this is the single biggest lever on per-look cost.
+      // The cache is still consulted even in manual mode: if somebody has
+      // already identified this item, it is free to attach and there is no
+      // reason to make the poster type it again.
       const cached = await cache?.get(hash);
       if (cached) {
         let product = cached;
@@ -265,6 +277,11 @@ export async function runPipeline(input: RunPipelineInput): Promise<PipelineResu
         }
 
         out.push({ ...base, product, title: product.title });
+        continue;
+      }
+
+      if (skipProductSearch) {
+        out.push({ ...base, resolutionNote: 'awaiting a link from the poster' });
         continue;
       }
 

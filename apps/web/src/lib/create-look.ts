@@ -154,6 +154,12 @@ export async function processLook(
       mimeType,
       providers: p,
       cache: new DbProductCache(database),
+      // Launch lever. With VIOLA_MANUAL_TAGGING=1 no paid product lookup runs
+      // at all — garments are still detected, scored and laid out, and the
+      // poster fills in the links. That drops a look from about $0.027 to
+      // $0.0016, and every link they add is cached globally, so the automated
+      // path gets cheaper the longer it stays off.
+      skipProductSearch: process.env.VIOLA_MANUAL_TAGGING === '1',
       // In mock mode the catalogue points at a fixture host, so a local upload
       // still produces a card with real cutouts instead of silently degrading
       // to labels only.

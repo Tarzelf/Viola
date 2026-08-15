@@ -92,6 +92,33 @@ starts around $99/month. Lens is the right call at this stage purely because it
 reuses one key and one account; Syte is the upgrade path if visual match
 quality becomes the thing limiting conversion.
 
+### Launching without paying for any of this
+
+`VIOLA_MANUAL_TAGGING=1` skips paid product lookup entirely. Garments are still
+detected, scored and laid out; the poster adds the shop links themselves. A
+look drops from about **$0.027 to $0.0016** — vision only.
+
+This is worth more than the saving. The `products` table is keyed by a
+normalised query hash and is **global**, so when one person identifies their
+Aritzia trousers, every future look containing those trousers resolves for free.
+Manual entries do not avoid one lookup, they permanently remove that item from
+the paid path for the whole product.
+
+So running in manual mode early is not a stopgap — it builds a catalogue that
+makes the automated path cheaper forever, and it is the only source of ground
+truth you will ever get about which product a garment actually is. The person
+wearing it knows; the model is guessing.
+
+The cache is still read in manual mode, so nobody is asked to re-type something
+another user already contributed.
+
+Pasted links are validated before storage: http(s) only, and `utm_*`, `gclid`,
+`tag` and similar are stripped — otherwise somebody else's affiliate tag rides
+along on our own redirect.
+
+Watch `manualContributionStats()` for the share of items that are
+user-identified. If it climbs, per-look cost falls with no optimisation work.
+
 ## 3. Affiliate — the commission
 
 This is the "one solution that includes everything" answer.
